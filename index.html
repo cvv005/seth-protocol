@@ -204,11 +204,11 @@
         <div class="bg-black/70 border border-neon-red/30 rounded-xl p-4.5 space-y-4 shadow-lg">
           <div class="flex justify-between items-center text-sm">
             <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-coins text-neon-pink"></i> 推薦平打單注</span>
-            <span id="resBet" class="font-black text-neon-pink text-xl font-mono drop-shadow">25 分</span>
+            <span id="resBet" class="font-black text-neon-pink text-xl font-mono drop-shadow">24 分</span>
           </div>
           <div class="flex justify-between items-center text-sm">
             <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-400"></i> 預計防禦轉數</span>
-            <span id="resSpins" class="font-bold text-emerald-400 text-base font-mono">200 轉</span>
+            <span id="resSpins" class="font-bold text-emerald-400 text-base font-mono">208 轉</span>
           </div>
           <div class="flex justify-between items-center text-sm pt-2 border-t border-white/10">
             <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-sliders text-neon-purple"></i> 建議進攻打法</span>
@@ -345,6 +345,15 @@
 
   <!-- JS 特效與邏輯 -->
   <script>
+    // 指定面額清單
+    const allowedBets = [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 30, 32, 36, 
+      40, 42, 48, 54, 56, 60, 64, 72, 80, 96, 100, 112, 120, 128, 140, 144, 
+      160, 180, 200, 240, 280, 300, 320, 360, 400, 420, 480, 500, 540, 560, 
+      600, 640, 700, 720, 800, 840, 900, 960, 980, 1000, 1080, 1120, 1200, 
+      1280, 1400, 1440, 1600, 1800, 2000
+    ];
+
     // 1. 動態高亮黑紅粒子 Canvas 背景
     const canvas = document.getElementById('cyberCanvas');
     const ctx = canvas.getContext('2d');
@@ -394,7 +403,7 @@
       document.getElementById('onlineCount').innerText = (3400 + Math.floor(Math.random() * 90)).toLocaleString() + ' 人';
     }, 2500);
 
-    // 3. 試算邏輯
+    // 3. 試算邏輯（根據允許面額進行匹配）
     function setCapital(val) {
       document.getElementById('capitalInput').value = val;
       calculateStrategy();
@@ -404,7 +413,16 @@
       const capital = parseFloat(document.getElementById('capitalInput').value) || 0;
       if (capital <= 0) return;
 
-      let bet = Math.max(5, Math.floor(capital / 200));
+      let target = capital / 200;
+      let bet = allowedBets[0];
+
+      for (let i = allowedBets.length - 1; i >= 0; i--) {
+        if (allowedBets[i] <= target) {
+          bet = allowedBets[i];
+          break;
+        }
+      }
+
       let spins = Math.floor(capital / bet);
 
       let strategyText = "平穩防守 · 慢磨訊號";
