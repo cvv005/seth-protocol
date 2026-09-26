@@ -437,7 +437,6 @@
       vipContainer.innerHTML = '';
 
       for (let i = 1; i <= 10; i++) {
-        const roomCode = '#' + String(Math.floor(Math.random() * 300) + 100).padStart(3, '0');
         const rate = (97.0 + Math.random() * 2.8).toFixed(1);
         const tag = vipTags[i - 1];
 
@@ -457,8 +456,8 @@
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-[11px]">
-            <span class="text-gray-400 font-mono text-[10px]">內部編號 ${roomCode}</span>
-            <button onclick="openVipModal('${roomCode}', '${rate}%')" class="bg-neon-purple/30 hover:bg-neon-purple text-purple-200 hover:text-white px-2.5 py-1 rounded-lg border border-neon-purple/50 font-bold transition">
+            <span class="text-gray-400 font-mono text-[10px]">內部編號 #???</span>
+            <button onclick="openVipModal('VIP ${i}', '${rate}%')" class="bg-neon-purple/30 hover:bg-neon-purple text-purple-200 hover:text-white px-2.5 py-1 rounded-lg border border-neon-purple/50 font-bold transition">
               解鎖房號
             </button>
           </div>
@@ -490,8 +489,8 @@
       renderVipRooms();
     }
 
-    function openVipModal(roomCode = '#VIP', rate = '99.2%') { 
-      document.getElementById('modalRoomTag').innerText = roomCode + ' 房';
+    function openVipModal(roomCode = 'VIP', rate = '99.2%') { 
+      document.getElementById('modalRoomTag').innerText = roomCode;
       document.getElementById('modalRateTag').innerText = rate;
       document.getElementById('vipModal').classList.remove('hidden'); 
     }
