@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>戰神賽特 · 數據演算法選房終端 (SETH PROTOCOL)</title>
-  <!-- Tailwind CSS -->
+  <title>SETH PROTOCOL · 戰神賽特數據演算法選房終端</title>
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
+  <!-- FontAwesome Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Fonts: Orbitron & Noto Sans TC -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -42,13 +43,11 @@
       font-family: 'Noto Sans TC', sans-serif;
     }
 
-    /* 確保文字清晰顯示不透明，並保有霓虹發光 */
     .neon-solid-text {
       color: #FF2A7A;
       text-shadow: 0 0 12px rgba(255, 0, 60, 0.8), 0 0 20px rgba(255, 42, 122, 0.5);
     }
 
-    /* 賽博卡片與高透光玻璃感 */
     .cyber-card {
       background: rgba(18, 5, 9, 0.85);
       backdrop-filter: blur(16px);
@@ -57,7 +56,6 @@
       position: relative;
     }
 
-    /* 流動霓虹光軌按鈕與邊框 */
     @keyframes borderGlow {
       0%, 100% { border-color: rgba(255, 0, 60, 0.8); box-shadow: 0 0 20px rgba(255, 0, 60, 0.4), inset 0 0 10px rgba(255, 0, 60, 0.2); }
       50% { border-color: rgba(176, 38, 255, 0.9); box-shadow: 0 0 35px rgba(176, 38, 255, 0.6), inset 0 0 15px rgba(176, 38, 255, 0.3); }
@@ -66,7 +64,6 @@
       animation: borderGlow 3s infinite ease-in-out;
     }
 
-    /* 呼吸脈衝按鈕 */
     @keyframes btnPulse {
       0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 0, 60, 0.6)); }
       50% { transform: scale(1.02); filter: drop-shadow(0 0 25px rgba(255, 0, 60, 0.9)); }
@@ -75,7 +72,6 @@
       animation: btnPulse 2s infinite ease-in-out;
     }
 
-    /* 背景動態氛圍光斑 */
     .glow-orb-1 {
       position: fixed;
       top: 10%; left: 15%;
@@ -103,7 +99,6 @@
       100% { transform: translate(30px, -40px) scale(1.2); }
     }
 
-    /* 懸浮強光與躍動卡片 */
     .hover-cyber {
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -113,7 +108,6 @@
       box-shadow: 0 10px 30px rgba(255, 0, 60, 0.4), inset 0 0 15px rgba(255, 0, 60, 0.2);
     }
 
-    /* 客製化滾動條 */
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
     }
@@ -125,182 +119,272 @@
       background: rgba(255, 0, 60, 0.5);
       border-radius: 8px;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 0, 60, 0.8);
-    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative selection:bg-neon-red selection:text-white">
 
-  <!-- 背景動態光斑 -->
+  <!-- 背景動態光斑與 Canvas -->
   <div class="glow-orb-1"></div>
   <div class="glow-orb-2"></div>
-
-  <!-- 背景動態：粒子 Canvas -->
   <canvas id="cyberCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
-  <!-- 頂部導覽列 -->
-  <header class="w-full border-b border-neon-red/40 cyber-card sticky top-0 z-40 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
-      <div class="flex items-center space-x-3.5">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-neon-red via-red-600 to-neon-purple flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-neon-red/50 ring-2 ring-neon-pink animate-pulse">
-          𓁦
-        </div>
-        <div>
-          <h1 class="text-xl font-mono font-black tracking-widest neon-solid-text flex items-center gap-2">
-            SETH PROTOCOL <span class="bg-gradient-to-r from-neon-red to-neon-purple text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal shadow-md shadow-neon-red/40">v3.5 Cyber</span>
-          </h1>
-          <p class="text-[11px] text-pink-200/80 font-medium">戰神賽特 · 數據演算法選房終端</p>
-        </div>
-      </div>
+  <!-- ==================== 頁面 1: 入口驗證頁面 (預設顯示) ==================== -->
+  <div id="gatekeeperPage" class="min-h-screen w-full flex items-center justify-center p-4 z-10 relative">
+    <div class="cyber-card max-w-md w-full rounded-3xl p-8 border-neon-red/60 animate-border-glow shadow-2xl relative overflow-hidden text-center">
       
-      <a href="https://t.me" target="_blank" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black text-xs px-6 py-2.5 rounded-full shadow-lg shadow-neon-red/40 transition duration-300 hover:scale-105 border border-pink-300">
-        <i class="fa-brands fa-telegram text-base animate-bounce"></i>
-        <span>加入 TG 官方頻道</span>
-      </a>
-    </div>
-
-    <!-- 即時數據跑馬燈 -->
-    <div class="bg-black/80 border-t border-neon-red/30 text-[11px] py-2 px-4 text-gray-300 flex justify-between overflow-x-auto whitespace-nowrap backdrop-blur-md">
-      <div class="flex space-x-8 mx-auto items-center font-mono">
-        <span><i class="fa-solid fa-bolt text-neon-red mr-1.5 animate-pulse"></i> API 延遲: <strong id="pingText" class="text-emerald-400">8ms</strong></span>
-        <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 核心防護: <strong class="text-cyan-400">動態加密防封鎖</strong></span>
-        <span><i class="fa-solid fa-users text-neon-purple mr-1.5"></i> 即時連線: <strong id="onlineCount" class="text-purple-300">3,450 人</strong></span>
-        <span><i class="fa-solid fa-fire text-neon-pink mr-1.5"></i> 熱門爆分卡池: <strong class="text-neon-pink">#087, #142, #209</strong></span>
+      <!-- 標誌區 -->
+      <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-neon-red via-red-600 to-neon-purple flex items-center justify-center text-white text-4xl shadow-xl shadow-neon-red/50 ring-4 ring-neon-pink animate-pulse mx-auto mb-5">
+        𓁦
       </div>
-    </div>
-  </header>
 
-  <!-- 主內容區 -->
-  <main class="max-w-7xl mx-auto px-4 mt-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow z-10">
-    
-    <!-- 左側：本金戰術與風控試算 -->
-    <section class="lg:col-span-5 flex flex-col space-y-6">
-      <div class="cyber-card rounded-2xl p-6 border-neon-red/50 animate-border-glow overflow-hidden">
+      <h1 class="text-2xl font-mono font-black tracking-widest neon-solid-text mb-1">SETH PROTOCOL</h1>
+      <p class="text-xs text-pink-200/80 font-medium mb-6">戰神賽特 · 數據演算法選房終端系統</p>
 
-        <h2 class="text-base font-bold text-white flex items-center justify-between mb-5 border-b border-neon-red/30 pb-3">
-          <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-neon-red text-lg"></i> 本金戰術與風控試算</span>
-          <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/40 font-mono font-bold shadow-sm shadow-neon-red/30">AI ENGINE</span>
-        </h2>
+      <!-- 錯誤提示 -->
+      <div id="authErrorMsg" class="hidden mb-4 p-3 bg-red-950/80 border border-red-500/80 rounded-xl text-red-300 text-xs font-bold animate-bounce">
+        <i class="fa-solid fa-triangle-exclamation mr-1"></i> 通行密碼不正確，請重新輸入！
+      </div>
 
-        <!-- 輸入區 -->
-        <div class="mb-5">
-          <label class="block text-xs text-gray-300 mb-2 font-medium">請輸入您的預算本金 (分/元)</label>
+      <!-- 通行密碼輸入區 -->
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-300 mb-2">請輸入通行密碼</label>
           <div class="relative">
-            <input type="number" id="capitalInput" value="5000" placeholder="例如: 5000" 
-              class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-2xl font-black text-neon-pink font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner">
-            <span class="absolute right-4 top-4 text-xs text-neon-pink/70 font-bold font-mono">PTS</span>
-          </div>
-          <!-- 快捷按鈕 -->
-          <div class="grid grid-cols-4 gap-2 mt-3 font-mono">
-            <button onclick="setCapital(1000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">1,000</button>
-            <button onclick="setCapital(5000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">5,000</button>
-            <button onclick="setCapital(10000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">10,000</button>
-            <button onclick="setCapital(30000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">30,000</button>
+            <input type="password" id="passcodeKey" placeholder="請輸入解鎖密碼..." 
+              class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-white font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner text-sm">
+            <button onclick="verifyPasscode()" class="absolute right-2 top-2 bg-gradient-to-r from-neon-red to-neon-pink hover:brightness-125 text-white text-xs font-black px-4 py-2 rounded-lg transition shadow-md">
+              解鎖驗證
+            </button>
           </div>
         </div>
 
-        <!-- 試算結果 -->
-        <div class="bg-black/70 border border-neon-red/30 rounded-xl p-4.5 space-y-4 shadow-lg">
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-coins text-neon-pink"></i> 推薦平打單注</span>
-            <span id="resBet" class="font-black text-neon-pink text-xl font-mono drop-shadow">24 分</span>
-          </div>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-400"></i> 預計防禦轉數</span>
-            <span id="resSpins" class="font-bold text-emerald-400 text-base font-mono">208 轉</span>
-          </div>
-          <div class="flex justify-between items-center text-sm pt-2 border-t border-white/10">
-            <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-sliders text-neon-purple"></i> 建議進攻打法</span>
-            <span id="resStrategy" class="bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1 rounded-full font-bold shadow-sm shadow-purple-500/30">進退有度 · 買 Buy 試探</span>
-          </div>
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-white/10"></div>
+          <span class="flex-shrink mx-3 text-gray-500 text-[11px] font-mono">OR</span>
+          <div class="flex-grow border-t border-white/10"></div>
         </div>
 
-        <!-- 按鈕：計算最適打法 -->
-        <button onclick="triggerOracle()" class="w-full mt-6 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black py-4 rounded-xl shadow-xl shadow-neon-red/40 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95 border border-pink-300 pulse-btn">
-          <i class="fa-solid fa-calculator text-lg"></i>
-          <span>計算最適打法</span>
+        <!-- 免費試用按鈕 -->
+        <button onclick="startFreeTrial()" class="w-full bg-black/80 hover:bg-neon-purple/20 border border-neon-purple/60 hover:border-neon-purple text-purple-200 font-bold py-3.5 rounded-xl transition duration-300 flex items-center justify-center space-x-2 text-xs shadow-lg">
+          <i class="fa-solid fa-clock-rotate-left text-neon-purple text-sm animate-pulse"></i>
+          <span>免費試用體驗 (限定 10 分鐘)</span>
         </button>
       </div>
-    </section>
 
-    <!-- 右側：演算法選房系統 (包含10間VIP獨家爆分房號) -->
-    <section class="lg:col-span-7 flex flex-col space-y-6">
-      <div class="cyber-card rounded-2xl p-6 flex-grow flex flex-col justify-between overflow-hidden">
-        
-        <!-- 全螢幕儀式掃描覆蓋層 -->
-        <div id="scanningOverlay" class="absolute inset-0 bg-black/95 backdrop-blur-md z-30 flex flex-col items-center justify-center hidden">
-          <div class="relative w-24 h-24 flex items-center justify-center mb-4">
-            <div class="absolute inset-0 rounded-full border-4 border-neon-red/20 border-t-neon-red animate-spin"></div>
-            <div class="absolute inset-2 rounded-full border-2 border-cyan-400/20 border-b-cyan-400 animate-spin" style="animation-direction: reverse;"></div>
-            <span class="text-4xl animate-pulse text-neon-pink">𓁦</span>
+      <div class="mt-8 text-[10px] text-gray-500 font-mono border-t border-white/10 pt-4">
+        SETH ENGINE v3.5 · DYNAMIC ENCRYPTED ACCESS
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== 頁面 2: 選房主終端頁面 (預設隱藏) ==================== -->
+  <div id="mainDashboardPage" class="hidden min-h-screen flex flex-col justify-between relative z-10">
+    
+    <!-- 頂部導覽列 -->
+    <header class="w-full border-b border-neon-red/40 cyber-card sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
+        <div class="flex items-center space-x-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-neon-red via-red-600 to-neon-purple flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-neon-red/50 ring-2 ring-neon-pink animate-pulse">
+            𓁦
           </div>
-          <div class="text-neon-pink font-mono font-bold text-lg tracking-widest animate-pulse">OPTIMIZING STRATEGY...</div>
-          <p class="text-xs text-gray-400 mt-2 font-mono">RE-CALCULATING 10 VIP ROOMS &amp; SEED POOLS...</p>
+          <div>
+            <h1 class="text-xl font-mono font-black tracking-widest neon-solid-text flex items-center gap-2">
+              SETH PROTOCOL <span class="bg-gradient-to-r from-neon-red to-neon-purple text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal shadow-md shadow-neon-red/40">v3.5 Cyber</span>
+            </h1>
+            <p class="text-[11px] text-pink-200/80 font-medium">戰神賽特 · 數據演算法選房終端</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <div id="trialBadge" class="hidden bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1.5 rounded-full font-mono font-bold animate-pulse">
+            <i class="fa-solid fa-stopwatch mr-1"></i> 試用剩餘: <span id="trialTimer">10:00</span>
+          </div>
+          <a href="https://t.me" target="_blank" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black text-xs px-5 py-2 rounded-full shadow-lg shadow-neon-red/40 transition duration-300 hover:scale-105 border border-pink-300">
+            <i class="fa-brands fa-telegram text-base animate-bounce"></i>
+            <span>TG 官方頻道</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 即時跑馬燈 -->
+      <div class="bg-black/80 border-t border-neon-red/30 text-[11px] py-2 px-4 text-gray-300 flex justify-between overflow-x-auto whitespace-nowrap backdrop-blur-md">
+        <div class="flex space-x-8 mx-auto items-center font-mono">
+          <span><i class="fa-solid fa-bolt text-neon-red mr-1.5 animate-pulse"></i> API 延遲: <strong id="pingText" class="text-emerald-400">8ms</strong></span>
+          <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 核心防護: <strong class="text-cyan-400">動態加密防封鎖</strong></span>
+          <span><i class="fa-solid fa-users text-neon-purple mr-1.5"></i> 即時連線: <strong id="onlineCount" class="text-purple-300">3,450 人</strong></span>
+          <span><i class="fa-solid fa-fire text-neon-pink mr-1.5"></i> 熱門爆分卡池: <strong class="text-neon-pink">#087, #142, #209</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="max-w-7xl mx-auto px-4 mt-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow z-10">
+      
+      <!-- 左側：試算 -->
+      <section class="lg:col-span-5 flex flex-col space-y-6">
+        <div class="cyber-card rounded-2xl p-6 border-neon-red/50 animate-border-glow overflow-hidden">
+          <h2 class="text-base font-bold text-white flex items-center justify-between mb-5 border-b border-neon-red/30 pb-3">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-neon-red text-lg"></i> 本金戰術與風控試算</span>
+            <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/40 font-mono font-bold shadow-sm shadow-neon-red/30">AI ENGINE</span>
+          </h2>
+
+          <div class="mb-5">
+            <label class="block text-xs text-gray-300 mb-2 font-medium">請輸入您的預算本金 (分/元)</label>
+            <div class="relative">
+              <input type="number" id="capitalInput" value="5000" placeholder="例如: 5000" 
+                class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-2xl font-black text-neon-pink font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner">
+              <span class="absolute right-4 top-4 text-xs text-neon-pink/70 font-bold font-mono">PTS</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2 mt-3 font-mono">
+              <button onclick="setCapital(1000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">1,000</button>
+              <button onclick="setCapital(5000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">5,000</button>
+              <button onclick="setCapital(10000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">10,000</button>
+              <button onclick="setCapital(30000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">30,000</button>
+            </div>
+          </div>
+
+          <div class="bg-black/70 border border-neon-red/30 rounded-xl p-4.5 space-y-4 shadow-lg">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-coins text-neon-pink"></i> 推薦平打單注</span>
+              <span id="resBet" class="font-black text-neon-pink text-xl font-mono drop-shadow">24 分</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-400"></i> 預計防禦轉數</span>
+              <span id="resSpins" class="font-bold text-emerald-400 text-base font-mono">208 轉</span>
+            </div>
+            <div class="flex justify-between items-center text-sm pt-2 border-t border-white/10">
+              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-sliders text-neon-purple"></i> 建議進攻打法</span>
+              <span id="resStrategy" class="bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1 rounded-full font-bold shadow-sm shadow-purple-500/30">進退有度 · 買 Buy 試探</span>
+            </div>
+          </div>
+
+          <button onclick="triggerOracle()" class="w-full mt-6 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black py-4 rounded-xl shadow-xl shadow-neon-red/40 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95 border border-pink-300 pulse-btn">
+            <i class="fa-solid fa-calculator text-lg"></i>
+            <span>計算最適打法</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 右側：房號與 VIP -->
+      <section class="lg:col-span-7 flex flex-col space-y-6">
+        <div class="cyber-card rounded-2xl p-6 flex-grow flex flex-col justify-between overflow-hidden">
+          
+          <div id="scanningOverlay" class="absolute inset-0 bg-black/95 backdrop-blur-md z-30 flex flex-col items-center justify-center hidden">
+            <div class="relative w-24 h-24 flex items-center justify-center mb-4">
+              <div class="absolute inset-0 rounded-full border-4 border-neon-red/20 border-t-neon-red animate-spin"></div>
+              <div class="absolute inset-2 rounded-full border-2 border-cyan-400/20 border-b-cyan-400 animate-spin" style="animation-direction: reverse;"></div>
+              <span class="text-4xl animate-pulse text-neon-pink">𓁦</span>
+            </div>
+            <div class="text-neon-pink font-mono font-bold text-lg tracking-widest animate-pulse">OPTIMIZING STRATEGY...</div>
+            <p class="text-xs text-gray-400 mt-2 font-mono">RE-CALCULATING 10 VIP ROOMS &amp; SEED POOLS...</p>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-4 border-b border-neon-red/30 pb-3">
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-door-open text-neon-red text-lg"></i> 系統推薦勝率房號 (主推 + 10間 VIP)
+              </h2>
+              <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-xs text-emerald-400 font-mono font-bold">LIVE MONITORING</span>
+              </div>
+            </div>
+
+            <!-- 主推 1 號房 -->
+            <div class="mb-5 bg-black/80 border border-neon-red/80 rounded-2xl p-4.5 hover-cyber group relative overflow-hidden shadow-lg">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/50 font-bold shadow-sm shadow-neon-red/30">首選勝率帝王房</span>
+                  <div id="mainRoomNum" class="text-3xl font-black text-white mt-2 font-mono tracking-tight group-hover:text-neon-pink transition drop-shadow">#087 號房</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-gray-400 font-medium">爆分預測指數</div>
+                  <div id="rateText1" class="text-2xl font-black text-emerald-400 font-mono mt-1 drop-shadow">98.8%</div>
+                </div>
+              </div>
+              
+              <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
+                <span class="text-gray-300 flex items-center gap-1"><i class="fa-solid fa-fire text-neon-pink animate-pulse"></i> 高倍數乘數訊號極強</span>
+                <a href="https://cvv005.mw168.online" target="_blank" class="bg-neon-red/20 hover:bg-neon-red text-neon-pink hover:text-white border border-neon-red/60 font-bold px-3.5 py-1.5 rounded-lg transition shadow-md">前往機台 ➔</a>
+              </div>
+            </div>
+
+            <!-- VIP 10 間 -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-crown text-neon-purple"></i> VIP 獨家爆分房池 (共 10 間)
+              </span>
+              <span class="text-[10px] text-gray-400">上下滑動查看更多 🠇</span>
+            </div>
+
+            <div id="vipRoomContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-neon-red/30">
+            <button onclick="generateCardCanvas()" class="w-full bg-gradient-to-r from-black via-zinc-900 to-black hover:from-zinc-900 hover:to-zinc-900 text-neon-pink border border-neon-pink/60 py-3.5 rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-neon-red/30">
+              <i class="fa-solid fa-image text-neon-pink text-lg animate-pulse"></i>
+              <span>一鍵生成『戰神幸運戰報卡』圖片</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="mt-10 py-4 border-t border-neon-red/30 text-center text-xs text-gray-500 z-10 font-mono">
+      <p>© 2026 SETH PROTOCOL · 僅供娛樂數據分析參考，請理性娛樂。</p>
+    </footer>
+  </div>
+
+
+  <!-- ==================== Modal 1: 管理員控制台 (輸入 aimincvv168 開啟) ==================== -->
+  <div id="adminModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="cyber-card max-w-md w-full rounded-2xl p-6 relative border-neon-red/80 shadow-2xl">
+      <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-neon-red/40">
+        <div class="w-10 h-10 rounded-xl bg-neon-red/20 border border-neon-red flex items-center justify-center text-neon-pink text-xl">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-white">管理員發行控制台</h3>
+          <p class="text-[11px] text-gray-400 font-mono">ADMIN: aimincvv168</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-300 mb-2">新增發行通行密碼</label>
+          <div class="flex space-x-2">
+            <input type="text" id="newPasscodeKey" placeholder="例如: VIP999" 
+              class="flex-1 bg-black/80 border border-neon-purple/60 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-neon-pink">
+            <button onclick="addNewPasscode()" class="bg-gradient-to-r from-neon-purple to-neon-pink hover:brightness-125 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md">
+              發行密碼
+            </button>
+          </div>
         </div>
 
         <div>
-          <div class="flex justify-between items-center mb-4 border-b border-neon-red/30 pb-3">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-door-open text-neon-red text-lg"></i> 系統推薦勝率房號 (主推 + 10間 VIP)
-            </h2>
-            <div class="flex items-center space-x-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-              <span class="text-xs text-emerald-400 font-mono font-bold">LIVE MONITORING</span>
-            </div>
-          </div>
-
-          <!-- 主推 1 號房卡片 -->
-          <div class="mb-5 bg-black/80 border border-neon-red/80 rounded-2xl p-4.5 hover-cyber group relative overflow-hidden shadow-lg">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/50 font-bold shadow-sm shadow-neon-red/30">首選勝率帝王房</span>
-                <div id="mainRoomNum" class="text-3xl font-black text-white mt-2 font-mono tracking-tight group-hover:text-neon-pink transition drop-shadow">#087 號房</div>
-              </div>
-              <div class="text-right">
-                <div class="text-xs text-gray-400 font-medium">爆分預測指數</div>
-                <div id="rateText1" class="text-2xl font-black text-emerald-400 font-mono mt-1 drop-shadow">98.8%</div>
-              </div>
-            </div>
-            
-            <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
-              <span class="text-gray-300 flex items-center gap-1"><i class="fa-solid fa-fire text-neon-pink animate-pulse"></i> 高倍數乘數訊號極強</span>
-              <a href="https://cvv005.mw168.online" target="_blank" class="bg-neon-red/20 hover:bg-neon-red text-neon-pink hover:text-white border border-neon-red/60 font-bold px-3.5 py-1.5 rounded-lg transition shadow-md">前往機台 ➔</a>
-            </div>
-          </div>
-
-          <!-- VIP 獨家爆分房牆 (10 間房號) -->
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-crown text-neon-purple"></i> VIP 獨家爆分房池 (共 10 間)
-            </span>
-            <span class="text-[10px] text-gray-400">上下滑動查看更多 🠇</span>
-          </div>
-
-          <div id="vipRoomContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
-            <!-- 10 間 VIP 房將由 JS 動態生成 renderVipRooms() -->
+          <label class="block text-xs font-bold text-gray-300 mb-2">已發行密碼清單</label>
+          <div id="issuedPasscodesList" class="bg-black/60 border border-white/10 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2 font-mono text-xs">
           </div>
         </div>
 
-        <!-- 生成戰報卡按鈕 -->
-        <div class="mt-6 pt-4 border-t border-neon-red/30">
-          <button onclick="generateCardCanvas()" class="w-full bg-gradient-to-r from-black via-zinc-900 to-black hover:from-zinc-900 hover:to-zinc-900 text-neon-pink border border-neon-pink/60 py-3.5 rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-neon-red/30">
-            <i class="fa-solid fa-image text-neon-pink text-lg animate-pulse"></i>
-            <span>一鍵生成『戰神幸運戰報卡』圖片</span>
-          </button>
-        </div>
-
+        <button onclick="closeAdminModal(); enterDashboard();" class="w-full bg-neon-red hover:bg-red-600 text-white font-bold py-3 rounded-xl transition text-xs shadow-lg mt-2">
+          進入主選房系統 ➔
+        </button>
       </div>
-    </section>
+    </div>
+  </div>
 
-  </main>
 
-  <!-- 頁尾 -->
-  <footer class="mt-10 py-4 border-t border-neon-red/30 text-center text-xs text-gray-500 z-10 font-mono">
-    <p>© 2026 SETH PROTOCOL · 僅供娛樂數據分析參考，請理性娛樂。</p>
-  </footer>
-
-  <!-- Modal 1: 解鎖 VIP 房號 -->
+  <!-- ==================== Modal 2: VIP 解鎖 ==================== -->
   <div id="vipModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
     <div class="cyber-card max-w-sm w-full rounded-2xl p-6 text-center relative border-neon-purple/60">
       <button onclick="closeVipModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
@@ -324,10 +408,10 @@
     </div>
   </div>
 
-  <!-- Modal 2: 展示戰報圖片 -->
+
+  <!-- ==================== Modal 3: 戰報卡 ==================== -->
   <div id="cardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
     <div class="max-w-md w-full flex flex-col items-center my-auto">
-      
       <div class="rounded-xl overflow-hidden cyber-card border-neon-red shadow-2xl mb-4">
         <canvas id="reportCanvas" width="540" height="960" class="w-[270px] h-[480px] sm:w-[320px] sm:h-[568px]"></canvas>
       </div>
@@ -343,9 +427,14 @@
     </div>
   </div>
 
-  <!-- JS 特效與邏輯 -->
+
+  <!-- JS 核心邏輯 -->
   <script>
-    // 指定面額清單
+    // 預設發行密碼庫
+    let validPasscodes = ["SETH888", "VIP888", "SETH999"];
+    const adminAccount = "aimincvv168";
+
+    // 允許的面額
     const allowedBets = [
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 30, 32, 36, 
       40, 42, 48, 54, 56, 60, 64, 72, 80, 96, 100, 112, 120, 128, 140, 144, 
@@ -354,7 +443,88 @@
       1280, 1400, 1440, 1600, 1800, 2000
     ];
 
-    // 1. 動態高亮黑紅粒子 Canvas 背景
+    // 1. 驗證密碼邏輯
+    function verifyPasscode() {
+      const input = document.getElementById('passcodeKey').value.trim();
+      const errBox = document.getElementById('authErrorMsg');
+
+      if (input === adminAccount) {
+        errBox.classList.add('hidden');
+        openAdminModal();
+        return;
+      }
+
+      if (validPasscodes.includes(input)) {
+        errBox.classList.add('hidden');
+        enterDashboard();
+      } else {
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    // 免費試用 (10分鐘倒數)
+    function startFreeTrial() {
+      document.getElementById('trialBadge').classList.remove('hidden');
+      enterDashboard();
+
+      let timeLeft = 600; // 10分鐘
+      const timerElem = document.getElementById('trialTimer');
+
+      const interval = setInterval(() => {
+        timeLeft--;
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        timerElem.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          alert('您的 10 分鐘免費試用體驗已結束，請輸入通行密碼繼續使用！');
+          location.reload();
+        }
+      }, 1000);
+    }
+
+    function enterDashboard() {
+      document.getElementById('gatekeeperPage').classList.add('hidden');
+      document.getElementById('mainDashboardPage').classList.remove('hidden');
+      calculateStrategy();
+      renderVipRooms();
+    }
+
+    // 2. 管理員 Modal 邏輯
+    function openAdminModal() {
+      renderIssuedPasscodes();
+      document.getElementById('adminModal').classList.remove('hidden');
+    }
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.add('hidden');
+    }
+
+    function addNewPasscode() {
+      const newKey = document.getElementById('newPasscodeKey').value.trim();
+      if (newKey && !validPasscodes.includes(newKey)) {
+        validPasscodes.push(newKey);
+        document.getElementById('newPasscodeKey').value = '';
+        renderIssuedPasscodes();
+        alert(`成功發行密碼: ${newKey}`);
+      }
+    }
+
+    function renderIssuedPasscodes() {
+      const list = document.getElementById('issuedPasscodesList');
+      list.innerHTML = '';
+      validPasscodes.forEach((code, idx) => {
+        const item = document.createElement('div');
+        item.className = 'flex justify-between items-center bg-white/5 p-2 rounded-lg border border-white/5';
+        item.innerHTML = `
+          <span class="text-neon-pink font-bold">${code}</span>
+          <span class="text-[10px] text-gray-400">有效密碼 #${idx + 1}</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    // 3. 背景粒子 Canvas
     const canvas = document.getElementById('cyberCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -366,7 +536,7 @@
     window.addEventListener('resize', resize);
     resize();
 
-    for (let i = 0; i < 65; i++) {
+    for (let i = 0; i < 60; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -380,11 +550,9 @@
 
     function animateBg() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       particles.forEach(p => {
         p.y += p.speedY;
         if (p.y < 0) p.y = canvas.height;
-
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.opacity;
         ctx.font = `${p.size * 7}px Orbitron`;
@@ -392,18 +560,16 @@
         ctx.shadowColor = p.color;
         ctx.fillText(p.symbol, p.x, p.y);
       });
-
       requestAnimationFrame(animateBg);
     }
     animateBg();
 
-    // 2. 即時跳動數據
     setInterval(() => {
       document.getElementById('pingText').innerText = (7 + Math.floor(Math.random() * 5)) + 'ms';
       document.getElementById('onlineCount').innerText = (3400 + Math.floor(Math.random() * 90)).toLocaleString() + ' 人';
     }, 2500);
 
-    // 3. 試算邏輯（根據允許面額進行匹配）
+    // 4. 試算邏輯
     function setCapital(val) {
       document.getElementById('capitalInput').value = val;
       calculateStrategy();
@@ -444,7 +610,7 @@
       stratElem.className = `text-xs px-3 py-1 rounded-full font-bold border ${strategyColor}`;
     }
 
-    // 4. 動態渲染 10 間 VIP 獨家爆分房
+    // 5. VIP 獨家房渲染 (房號完全遮蔽)
     const vipTags = [
       "累積咬度爆滿", "連開大獎池", "高額倍率訊號", "大戶特選卡池", "黃金週期熱卡",
       "高吐分回饋", "長線穩健池", "進入爆發期", "買 Buy 高回報", "即時飆升房"
@@ -484,7 +650,6 @@
       }
     }
 
-    // 5. 計算最適打法與更新勝率
     function triggerOracle() {
       calculateStrategy();
       const overlay = document.getElementById('scanningOverlay');
@@ -502,8 +667,6 @@
 
       document.getElementById('mainRoomNum').innerText = randomRoom + ' 號房';
       document.getElementById('rateText1').innerText = randomRate + '%';
-      
-      // 重新生成 10 間 VIP 房
       renderVipRooms();
     }
 
@@ -515,7 +678,7 @@
     function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
     function closeCardModal() { document.getElementById('cardModal').classList.add('hidden'); }
 
-    // 6. 生成 9:16 高清戰報圖
+    // 6. 生成戰報 Canvas 圖片
     function generateCardCanvas() {
       const canvas = document.getElementById('reportCanvas');
       const ctx = canvas.getContext('2d');
@@ -611,10 +774,6 @@
       link.href = canvas.toDataURL();
       link.click();
     }
-
-    // 初始化載入
-    calculateStrategy();
-    renderVipRooms();
   </script>
 </body>
 </html>
