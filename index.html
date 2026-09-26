@@ -8,8 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Orbitron & Noto Sans TC -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -17,17 +17,19 @@
         extend: {
           colors: {
             egypt: {
-              black: '#07070A',
-              card: '#0F0F17',
-              border: '#262636',
-              gold: '#FFD700',
-              goldDark: '#B8860B',
-              purple: '#9333EA',
+              black: '#040406',
+              dark: '#0A0A10',
+              card: '#0E0E18',
+              border: '#1E1E30',
+              gold: '#FFE259',
+              goldDark: '#FFA751',
+              purple: '#A855F7',
               cyan: '#00F0FF'
             }
           },
           fontFamily: {
-            sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+            mono: ['Orbitron', 'monospace'],
+            sans: ['Noto Sans TC', 'sans-serif'],
           }
         }
       }
@@ -36,172 +38,179 @@
 
   <style>
     body {
-      background-color: #07070A;
-      color: #E2E8F0;
+      background-color: #040406;
+      color: #F1F5F9;
       overflow-x: hidden;
+      font-family: 'Noto Sans TC', sans-serif;
     }
 
-    /* 漸層金屬字體 & 光暈 */
+    /* 極致黑金霓虹光暈 */
     .gold-gradient-text {
-      background: linear-gradient(135deg, #FFF5C0 0%, #FFD700 50%, #996515 100%);
+      background: linear-gradient(135deg, #FFF176 0%, #FFD700 40%, #FFA751 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-    .gold-glow {
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
-    }
-    .gold-border-glow {
-      border: 1px solid rgba(255, 215, 0, 0.4);
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(255, 215, 0, 0.05);
+      filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.4));
     }
 
-    .glass-card {
-      background: rgba(15, 15, 23, 0.85);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .cyber-card {
+      background: rgba(14, 14, 24, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 215, 0, 0.05);
+      position: relative;
     }
 
-    /* 呼吸動態邊框 */
-    @keyframes borderPulse {
-      0%, 100% { border-color: rgba(255, 215, 0, 0.3); box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
-      50% { border-color: rgba(255, 215, 0, 0.8); box-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
-    }
-    .animate-border-pulse {
-      animation: borderPulse 3s infinite ease-in-out;
+    .cyber-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px; right: -1px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.8), transparent);
     }
 
-    /* 雷射掃描線動態 */
-    @keyframes scanline {
-      0% { top: -100%; }
-      100% { top: 200%; }
+    /* 科技感脈衝外框 */
+    @keyframes pulseGlow {
+      0%, 100% { border-color: rgba(255, 215, 0, 0.3); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+      50% { border-color: rgba(255, 215, 0, 0.8); box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
     }
-    .scanline-effect {
+    .animate-pulse-glow {
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+
+    /* 幾何閃光線 */
+    @keyframes scanGrid {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    .scan-beam {
       position: absolute;
       width: 100%;
-      height: 30%;
-      background: linear-gradient(to bottom, transparent, rgba(255, 215, 0, 0.2), transparent);
-      animation: scanline 2.5s infinite linear;
+      height: 40%;
+      background: linear-gradient(180deg, transparent, rgba(255, 226, 89, 0.15), transparent);
+      animation: scanGrid 3s infinite linear;
       pointer-events: none;
     }
 
-    /* 神話卡片懸浮 */
-    .hover-lift {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 神話卡片懸浮浮動 */
+    .hover-cyber {
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .hover-lift:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(255, 215, 0, 0.2);
+    .hover-cyber:hover {
+      transform: translateY(-6px) scale(1.01);
+      border-color: rgba(255, 215, 0, 0.8);
+      box-shadow: 0 15px 35px rgba(255, 215, 0, 0.25), inset 0 0 20px rgba(255, 215, 0, 0.1);
     }
   </style>
 </head>
-<body class="min-h-screen font-sans flex flex-col justify-between relative selection:bg-egypt-gold selection:text-black">
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-egypt-gold selection:text-black">
 
-  <!-- 背景粒子與動態幾何 Canvas -->
-  <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+  <!-- 背景動態：黑金神話幾何粒子 Canvas -->
+  <canvas id="cyberCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
-  <!-- 頂部導覽列 -->
-  <header class="w-full border-b border-egypt-border glass-card sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-egypt-gold via-yellow-600 to-amber-800 flex items-center justify-center text-black font-black text-2xl shadow-lg gold-glow">
+  <!-- 頂部高科技導覽列 -->
+  <header class="w-full border-b border-egypt-border/80 cyber-card sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-egypt-gold via-amber-500 to-yellow-800 flex items-center justify-center text-black font-black text-2xl shadow-lg shadow-yellow-500/30 ring-2 ring-egypt-gold/50">
           𓁦
         </div>
         <div>
-          <h1 class="text-xl font-black tracking-widest gold-gradient-text flex items-center gap-2">
-            SETH PROTOCOL <span class="bg-egypt-gold/20 text-egypt-gold text-[10px] px-2 py-0.5 rounded border border-egypt-gold/40">v2.4 Pro</span>
+          <h1 class="text-xl font-mono font-black tracking-widest gold-gradient-text flex items-center gap-2">
+            SETH PROTOCOL <span class="bg-gradient-to-r from-egypt-gold to-amber-500 text-black font-bold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-normal shadow">v3.0 Ultra</span>
           </h1>
-          <p class="text-[11px] text-gray-400">戰神賽特 · 數據演算法選房終端</p>
+          <p class="text-[11px] text-gray-400 font-medium">戰神賽特 · 數據演算法選房終端</p>
         </div>
       </div>
       
-      <a href="https://t.me" target="_blank" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:brightness-125 text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-lg transition duration-300 hover:scale-105">
-        <i class="fa-brands fa-telegram text-base animate-bounce"></i>
-        <span>加入 TG 官方訊號頻道</span>
+      <a href="https://t.me" target="_blank" class="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 hover:brightness-125 text-black font-black text-xs px-6 py-2.5 rounded-full shadow-lg shadow-yellow-500/20 transition duration-300 hover:scale-105 border border-yellow-300">
+        <i class="fa-brands fa-telegram text-base"></i>
+        <span>加入 TG 官方頻道</span>
       </a>
     </div>
 
-    <!-- 頂部動態跑馬燈與狀態欄 -->
-    <div class="bg-black/60 border-t border-egypt-border/60 text-[11px] py-1.5 px-4 text-gray-400 flex justify-between overflow-x-auto whitespace-nowrap">
-      <div class="flex space-x-8 mx-auto items-center">
-        <span><i class="fa-solid fa-signal text-emerald-400 mr-1.5"></i> API 延遲: <strong id="pingText" class="text-emerald-400 font-mono">12ms</strong></span>
-        <span><i class="fa-solid fa-shield-halved text-egypt-cyan mr-1.5"></i> 風控模擬: <strong class="text-egypt-cyan">防偵測安全</strong></span>
-        <span><i class="fa-solid fa-users text-purple-400 mr-1.5"></i> 即時線上: <strong id="onlineCount" class="text-purple-300 font-mono">2,849 人</strong></span>
-        <span><i class="fa-solid fa-bolt text-amber-400 mr-1.5"></i> 熱門爆分卡池: <strong class="text-amber-300">#087, #142, #209</strong></span>
+    <!-- 即時數據跑馬燈 -->
+    <div class="bg-black/80 border-t border-egypt-border/60 text-[11px] py-1.5 px-4 text-gray-400 flex justify-between overflow-x-auto whitespace-nowrap">
+      <div class="flex space-x-8 mx-auto items-center font-mono">
+        <span><i class="fa-solid fa-bolt text-egypt-gold mr-1.5"></i> API 延遲: <strong id="pingText" class="text-emerald-400">9ms</strong></span>
+        <span><i class="fa-solid fa-shield-halved text-egypt-cyan mr-1.5"></i> 核心防護: <strong class="text-egypt-cyan">動態加密防封鎖</strong></span>
+        <span><i class="fa-solid fa-users text-purple-400 mr-1.5"></i> 即時連線: <strong id="onlineCount" class="text-purple-300">3,120 人</strong></span>
+        <span><i class="fa-solid fa-fire text-amber-500 mr-1.5"></i> 熱門爆分卡池: <strong class="text-amber-300">#087, #142, #209</strong></span>
       </div>
     </div>
   </header>
 
-  <!-- 主內容區域 -->
+  <!-- 主內容區 -->
   <main class="max-w-7xl mx-auto px-4 mt-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow z-10">
     
-    <!-- 左側：本金戰術與風控試算 (5 Cols) -->
+    <!-- 左側：本金戰術與風控試算 -->
     <section class="lg:col-span-5 flex flex-col space-y-6">
-      <div class="glass-card rounded-2xl p-6 gold-border-glow relative overflow-hidden animate-border-pulse">
-        <div class="scanline-effect"></div>
+      <div class="cyber-card rounded-2xl p-6 border-egypt-gold/40 animate-pulse-glow overflow-hidden">
+        <div class="scan-beam"></div>
 
-        <h2 class="text-base font-bold text-white flex items-center justify-between mb-4 border-b border-egypt-border/80 pb-3">
-          <span class="flex items-center"><i class="fa-solid fa-calculator text-egypt-gold mr-2 text-lg"></i> 本金戰術與風控試算</span>
-          <span class="text-[10px] bg-egypt-gold/10 text-egypt-gold px-2 py-0.5 rounded border border-egypt-gold/30">AI 演算法</span>
+        <h2 class="text-base font-bold text-white flex items-center justify-between mb-5 border-b border-egypt-border/80 pb-3">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-egypt-gold text-lg"></i> 本金戰術與風控試算</span>
+          <span class="text-[10px] bg-egypt-gold/10 text-egypt-gold px-2.5 py-0.5 rounded-full border border-egypt-gold/30 font-mono">AI ENGINE</span>
         </h2>
 
-        <!-- 本金輸入區 -->
+        <!-- 輸入區 -->
         <div class="mb-5">
-          <label class="block text-xs text-gray-400 mb-2">請輸入您的預算本金 (分/元)</label>
+          <label class="block text-xs text-gray-400 mb-2 font-medium">請輸入您的預算本金 (分/元)</label>
           <div class="relative">
-            <input type="number" id="capitalInput" value="5000" placeholder="例如: 3000" 
-              class="w-full bg-black/80 border border-egypt-gold/40 rounded-xl px-4 py-3.5 text-2xl font-black text-egypt-gold focus:outline-none focus:border-egypt-gold focus:ring-2 focus:ring-egypt-gold/50 transition">
-            <span class="absolute right-4 top-4 text-xs text-gray-500 font-bold">PTS</span>
+            <input type="number" id="capitalInput" value="5000" placeholder="例如: 5000" 
+              class="w-full bg-black/90 border border-egypt-gold/50 rounded-xl px-4 py-3.5 text-2xl font-black text-egypt-gold font-mono focus:outline-none focus:border-egypt-gold focus:ring-2 focus:ring-egypt-gold/50 transition">
+            <span class="absolute right-4 top-4 text-xs text-gray-500 font-bold font-mono">PTS</span>
           </div>
-          <!-- 快速按鈕 -->
-          <div class="grid grid-cols-4 gap-2 mt-2.5">
-            <button onclick="setCapital(1000)" class="bg-black/50 hover:bg-egypt-gold/20 hover:text-egypt-gold text-gray-300 text-xs py-2 rounded-lg border border-white/10 transition font-mono">1,000</button>
-            <button onclick="setCapital(5000)" class="bg-black/50 hover:bg-egypt-gold/20 hover:text-egypt-gold text-gray-300 text-xs py-2 rounded-lg border border-white/10 transition font-mono">5,000</button>
-            <button onclick="setCapital(10000)" class="bg-black/50 hover:bg-egypt-gold/20 hover:text-egypt-gold text-gray-300 text-xs py-2 rounded-lg border border-white/10 transition font-mono">10,000</button>
-            <button onclick="setCapital(30000)" class="bg-black/50 hover:bg-egypt-gold/20 hover:text-egypt-gold text-gray-300 text-xs py-2 rounded-lg border border-white/10 transition font-mono">30,000</button>
+          <!-- 快捷按鈕 -->
+          <div class="grid grid-cols-4 gap-2 mt-3 font-mono">
+            <button onclick="setCapital(1000)" class="bg-black/60 hover:bg-egypt-gold/20 hover:text-egypt-gold border border-white/10 text-gray-300 text-xs py-2 rounded-lg transition">1,000</button>
+            <button onclick="setCapital(5000)" class="bg-black/60 hover:bg-egypt-gold/20 hover:text-egypt-gold border border-white/10 text-gray-300 text-xs py-2 rounded-lg transition">5,000</button>
+            <button onclick="setCapital(10000)" class="bg-black/60 hover:bg-egypt-gold/20 hover:text-egypt-gold border border-white/10 text-gray-300 text-xs py-2 rounded-lg transition">10,000</button>
+            <button onclick="setCapital(30000)" class="bg-black/60 hover:bg-egypt-gold/20 hover:text-egypt-gold border border-white/10 text-gray-300 text-xs py-2 rounded-lg transition">30,000</button>
           </div>
         </div>
 
-        <!-- 試算結果面板 -->
-        <div class="bg-black/70 border border-egypt-border rounded-xl p-4 space-y-3.5 relative">
+        <!-- 試算結果 -->
+        <div class="bg-black/80 border border-egypt-border rounded-xl p-4.5 space-y-4">
           <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-400 flex items-center"><i class="fa-solid fa-coins text-egypt-gold/70 mr-2"></i> 推薦平打單注</span>
-            <span id="resBet" class="font-black text-egypt-gold text-lg font-mono">25 分</span>
+            <span class="text-gray-400 flex items-center gap-2"><i class="fa-solid fa-coins text-egypt-gold/80"></i> 推薦平打單注</span>
+            <span id="resBet" class="font-black text-egypt-gold text-xl font-mono">25 分</span>
           </div>
           <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-400 flex items-center"><i class="fa-solid fa-shield text-emerald-400/70 mr-2"></i> 預計防禦轉數</span>
+            <span class="text-gray-400 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-400"></i> 預計防禦轉數</span>
             <span id="resSpins" class="font-bold text-emerald-400 text-base font-mono">200 轉</span>
           </div>
-          <div class="flex justify-between items-center text-sm pt-1 border-t border-white/5">
-            <span class="text-gray-400 flex items-center"><i class="fa-solid fa-chess-knight text-purple-400/70 mr-2"></i> 建議進攻打法</span>
+          <div class="flex justify-between items-center text-sm pt-2 border-t border-white/10">
+            <span class="text-gray-400 flex items-center gap-2"><i class="fa-solid fa-chess-god text-purple-400"></i> 建議進攻打法</span>
             <span id="resStrategy" class="bg-egypt-purple/30 border border-egypt-purple/60 text-purple-200 text-xs px-3 py-1 rounded-full font-bold">進退有度 · 買 Buy 試探</span>
           </div>
         </div>
 
         <!-- 召喚按鈕 -->
-        <button onclick="triggerOracle()" class="w-full mt-6 bg-gradient-to-r from-yellow-500 via-egypt-gold to-amber-600 hover:brightness-125 text-black font-black py-4 rounded-xl shadow-xl shadow-yellow-500/25 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95">
+        <button onclick="triggerOracle()" class="w-full mt-6 bg-gradient-to-r from-yellow-400 via-egypt-gold to-amber-500 hover:brightness-125 text-black font-black py-4 rounded-xl shadow-xl shadow-yellow-500/25 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95 border border-yellow-200">
           <i class="fa-solid fa-wand-magic-sparkles text-lg animate-spin"></i>
           <span>計算最適打法與召喚神諭</span>
         </button>
       </div>
     </section>
 
-    <!-- 右側：神諭選房系統 (7 Cols) -->
+    <!-- 右側：神諭選房系統 -->
     <section class="lg:col-span-7 flex flex-col space-y-6">
-      <div class="glass-card rounded-2xl p-6 gold-border-glow flex-grow flex flex-col justify-between relative overflow-hidden">
+      <div class="cyber-card rounded-2xl p-6 flex-grow flex flex-col justify-between overflow-hidden">
         
-        <!-- 全螢幕加載/儀式掃描覆蓋層 -->
-        <div id="scanningOverlay" class="absolute inset-0 bg-black/90 backdrop-blur-md z-30 flex flex-col items-center justify-center hidden">
-          <div class="w-20 h-20 rounded-full border-4 border-egypt-gold/20 border-t-egypt-gold animate-spin flex items-center justify-center mb-4">
-            <span class="text-2xl animate-pulse">𓁦</span>
+        <!-- 全螢幕儀式掃描覆蓋層 -->
+        <div id="scanningOverlay" class="absolute inset-0 bg-black/95 backdrop-blur-md z-30 flex flex-col items-center justify-center hidden">
+          <div class="relative w-24 h-24 flex items-center justify-center mb-4">
+            <div class="absolute inset-0 rounded-full border-4 border-egypt-gold/20 border-t-egypt-gold animate-spin"></div>
+            <div class="absolute inset-2 rounded-full border-2 border-egypt-cyan/20 border-b-egypt-cyan animate-spin" style="animation-direction: reverse;"></div>
+            <span class="text-3xl animate-pulse">𓁦</span>
           </div>
-          <div class="text-egypt-gold font-bold text-lg tracking-widest animate-pulse">正在掃描全伺服器機台數據...</div>
-          <p class="text-xs text-gray-500 mt-2 font-mono">CALCULATING SEED &amp; BITRATE...</p>
+          <div class="text-egypt-gold font-mono font-bold text-lg tracking-widest animate-pulse">CONNECTING TO SETH NODE...</div>
+          <p class="text-xs text-gray-500 mt-2 font-mono">CALCULATING SEED &amp; RTP BITRATE...</p>
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-6 border-b border-egypt-border/80 pb-3">
-            <h2 class="text-base font-bold text-white flex items-center">
-              <i class="fa-solid fa-door-open text-egypt-gold mr-2 text-lg"></i> 戰神神諭推薦房號
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-door-open text-egypt-gold text-lg"></i> 戰神神諭推薦房號
             </h2>
             <div class="flex items-center space-x-2">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -209,44 +218,44 @@
             </div>
           </div>
 
-          <!-- 房號顯示卡片區域 -->
+          <!-- 房號卡片區域 -->
           <div id="roomContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <!-- 房號卡片 1 -->
-            <div class="bg-black/80 border border-egypt-gold/40 rounded-xl p-5 relative overflow-hidden group hover-lift gold-border-glow">
+            <!-- 房號 1 -->
+            <div class="bg-black/90 border border-egypt-gold/50 rounded-2xl p-5 hover-cyber group relative overflow-hidden">
               <div class="flex justify-between items-start">
                 <div>
-                  <span class="text-[10px] bg-egypt-gold/20 text-egypt-gold px-2 py-0.5 rounded border border-egypt-gold/40 font-bold">主推勝率房</span>
-                  <div class="text-4xl font-black text-white mt-2 font-mono tracking-tight group-hover:text-egypt-gold transition">#087 號房</div>
+                  <span class="text-[10px] bg-egypt-gold/20 text-egypt-gold px-2.5 py-0.5 rounded-full border border-egypt-gold/40 font-bold">主推勝率房</span>
+                  <div class="text-4xl font-black text-white mt-3 font-mono tracking-tight group-hover:text-egypt-gold transition">#087 號房</div>
                 </div>
                 <div class="text-right">
-                  <div class="text-xs text-gray-400">爆分預測指數</div>
-                  <div id="rateText1" class="text-2xl font-black text-emerald-400 font-mono">98.4%</div>
+                  <div class="text-xs text-gray-400 font-medium">爆分預測指數</div>
+                  <div id="rateText1" class="text-2xl font-black text-emerald-400 font-mono mt-1">98.4%</div>
                 </div>
               </div>
               
-              <div class="mt-5 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
-                <span class="text-gray-400"><i class="fa-solid fa-fire text-amber-500 mr-1"></i> 高倍數乘數訊號</span>
-                <a href="https://t.me" target="_blank" class="bg-egypt-gold/10 hover:bg-egypt-gold text-egypt-gold hover:text-black border border-egypt-gold/40 font-bold px-3 py-1 rounded transition">前往機台 ➔</a>
+              <div class="mt-6 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
+                <span class="text-gray-400 flex items-center gap-1"><i class="fa-solid fa-fire text-amber-500"></i> 高倍數乘數訊號</span>
+                <a href="https://t.me" target="_blank" class="bg-egypt-gold/10 hover:bg-egypt-gold text-egypt-gold hover:text-black border border-egypt-gold/50 font-bold px-3.5 py-1.5 rounded-lg transition">前往機台 ➔</a>
               </div>
             </div>
 
-            <!-- 房號卡片 2 (VIP 鎖定版) -->
-            <div class="bg-black/80 border border-egypt-purple/40 rounded-xl p-5 relative overflow-hidden group hover-lift border-egypt-purple/50">
+            <!-- 房號 2 (VIP 解鎖) -->
+            <div class="bg-black/90 border border-purple-500/40 rounded-2xl p-5 hover-cyber group relative overflow-hidden">
               <div class="flex justify-between items-start">
                 <div>
-                  <span class="text-[10px] bg-egypt-purple/20 text-purple-300 px-2 py-0.5 rounded border border-egypt-purple/40 font-bold">VIP 獨家爆分房</span>
-                  <div class="text-4xl font-black text-gray-500 mt-2 font-mono tracking-tight blur-sm select-none">#??? 號房</div>
+                  <span class="text-[10px] bg-purple-500/20 text-purple-300 px-2.5 py-0.5 rounded-full border border-purple-500/40 font-bold">VIP 獨家爆分房</span>
+                  <div class="text-4xl font-black text-gray-600 mt-3 font-mono tracking-tight blur-sm select-none">#??? 號房</div>
                 </div>
                 <div class="text-right">
-                  <div class="text-xs text-gray-400">咬度回饋率</div>
-                  <div class="text-2xl font-black text-purple-400 font-mono">99.2%</div>
+                  <div class="text-xs text-gray-400 font-medium">咬度回饋率</div>
+                  <div class="text-2xl font-black text-purple-400 font-mono mt-1">99.2%</div>
                 </div>
               </div>
 
-              <div class="mt-5 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
-                <span class="text-gray-400"><i class="fa-solid fa-lock text-purple-400 mr-1"></i> 專屬隱藏訊號</span>
-                <button onclick="openVipModal()" class="bg-egypt-purple/40 hover:bg-egypt-purple text-purple-200 hover:text-white px-3 py-1 rounded border border-egypt-purple/60 font-bold transition">
+              <div class="mt-6 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
+                <span class="text-gray-400 flex items-center gap-1"><i class="fa-solid fa-lock text-purple-400"></i> 專屬隱藏訊號</span>
+                <button onclick="openVipModal()" class="bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white px-3.5 py-1.5 rounded-lg border border-purple-500/50 font-bold transition">
                   解鎖房號
                 </button>
               </div>
@@ -255,7 +264,7 @@
           </div>
         </div>
 
-        <!-- 一鍵生成戰報圖片按鈕 -->
+        <!-- 生成戰報卡按鈕 -->
         <div class="mt-8 pt-6 border-t border-egypt-border/80">
           <button onclick="generateCardCanvas()" class="w-full bg-gradient-to-r from-gray-900 via-black to-gray-900 hover:from-black hover:to-black text-egypt-gold border border-egypt-gold/60 py-3.5 rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-yellow-500/10">
             <i class="fa-solid fa-image text-egypt-gold text-lg"></i>
@@ -269,18 +278,18 @@
   </main>
 
   <!-- 頁尾 -->
-  <footer class="mt-10 py-4 border-t border-egypt-border/40 text-center text-xs text-gray-600 z-10">
+  <footer class="mt-10 py-4 border-t border-egypt-border/40 text-center text-xs text-gray-600 z-10 font-mono">
     <p>© 2026 SETH PROTOCOL · 僅供娛樂數據分析參考，請理性娛樂。</p>
   </footer>
 
-  <!-- Modal 1: 解鎖 VIP 房號 (TG 引流) -->
-  <div id="vipModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass-card max-w-sm w-full rounded-2xl p-6 gold-border-glow text-center relative animate-bounce-short">
+  <!-- Modal 1: 解鎖 VIP 房號 -->
+  <div id="vipModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="cyber-card max-w-sm w-full rounded-2xl p-6 text-center relative border-purple-500/50">
       <button onclick="closeVipModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
 
-      <div class="w-16 h-16 bg-egypt-purple/20 border border-egypt-purple/60 rounded-full flex items-center justify-center mx-auto mb-4 text-egypt-purple text-3xl shadow-lg shadow-purple-500/30">
+      <div class="w-16 h-16 bg-purple-500/20 border border-purple-500/60 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-400 text-3xl shadow-lg shadow-purple-500/30">
         <i class="fa-solid fa-crown"></i>
       </div>
 
@@ -289,19 +298,19 @@
         當前伺服器監控顯示 <strong class="text-egypt-gold">#142 號房</strong> 訊號極佳，累積咬度回饋率高達 99.2%！<br>點擊下方加入官方 Telegram 免費獲取今日解鎖金鑰。
       </p>
 
-      <a href="https://t.me" target="_blank" class="w-full block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:brightness-125 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-300 mb-3">
-        <i class="fa-brands fa-telegram mr-2 text-lg"></i> 加入 Telegram 領取解鎖碼
+      <a href="https://t.me" target="_blank" class="w-full block bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 text-black font-black py-3.5 rounded-xl shadow-lg transition duration-300 mb-3 border border-yellow-300">
+        <i class="fa-brands fa-telegram mr-1 text-lg"></i> 加入 Telegram 領取解鎖碼
       </a>
 
       <button onclick="closeVipModal()" class="text-xs text-gray-500 hover:underline">返回選房頁面</button>
     </div>
   </div>
 
-  <!-- Modal 2: 展示戰報圖片 (Canvas) -->
+  <!-- Modal 2: 展示戰報圖片 -->
   <div id="cardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
     <div class="max-w-md w-full flex flex-col items-center my-auto">
       
-      <div class="rounded-xl overflow-hidden gold-border-glow shadow-2xl mb-4">
+      <div class="rounded-xl overflow-hidden cyber-card border-egypt-gold shadow-2xl mb-4">
         <canvas id="reportCanvas" width="540" height="960" class="w-[270px] h-[480px] sm:w-[320px] sm:h-[568px]"></canvas>
       </div>
 
@@ -316,54 +325,54 @@
     </div>
   </div>
 
-  <!-- JavaScript 邏輯與動態特效 -->
+  <!-- JS 特效與邏輯 -->
   <script>
-    // 1. 背景動態粒子與金屬線條 (Canvas Background)
-    const bgCanvas = document.getElementById('bgCanvas');
-    const bgCtx = bgCanvas.getContext('2d');
+    // 1. 黑金神話 Canvas 動態背景
+    const canvas = document.getElementById('cyberCanvas');
+    const ctx = canvas.getContext('2d');
     let particles = [];
 
-    function resizeBg() {
-      bgCanvas.width = window.innerWidth;
-      bgCanvas.height = window.innerHeight;
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resizeBg);
-    resizeBg();
+    window.addEventListener('resize', resize);
+    resize();
 
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 55; i++) {
       particles.push({
-        x: Math.random() * bgCanvas.width,
-        y: Math.random() * bgCanvas.height,
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
         size: Math.random() * 2 + 0.5,
-        speedY: -Math.random() * 0.8 - 0.2,
-        opacity: Math.random() * 0.5 + 0.2
+        speedY: -Math.random() * 0.7 - 0.2,
+        opacity: Math.random() * 0.6 + 0.2,
+        symbol: ['𓁦', '𓃭', '𓋹', '𓍝'][Math.floor(Math.random() * 4)]
       });
     }
 
     function animateBg() {
-      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-      bgCtx.fillStyle = 'rgba(255, 215, 0, ';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach(p => {
         p.y += p.speedY;
-        if (p.y < 0) p.y = bgCanvas.height;
-        bgCtx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`;
-        bgCtx.beginPath();
-        bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        bgCtx.fill();
+        if (p.y < 0) p.y = canvas.height;
+
+        ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`;
+        ctx.font = `${p.size * 6}px Orbitron`;
+        ctx.fillText(p.symbol, p.x, p.y);
       });
 
       requestAnimationFrame(animateBg);
     }
     animateBg();
 
-    // 2. 即時數據跳動模擬 (Ping / 人數)
+    // 2. 即時跳動數據
     setInterval(() => {
-      document.getElementById('pingText').innerText = (10 + Math.floor(Math.random() * 6)) + 'ms';
-      document.getElementById('onlineCount').innerText = (2800 + Math.floor(Math.random() * 100)).toLocaleString() + ' 人';
-    }, 3000);
+      document.getElementById('pingText').innerText = (8 + Math.floor(Math.random() * 5)) + 'ms';
+      document.getElementById('onlineCount').innerText = (3100 + Math.floor(Math.random() * 80)).toLocaleString() + ' 人';
+    }, 2500);
 
-    // 3. 本金試算邏輯
+    // 3. 試算邏輯
     function setCapital(val) {
       document.getElementById('capitalInput').value = val;
       calculateStrategy();
@@ -381,7 +390,7 @@
 
       if (capital >= 5000 && capital < 20000) {
         strategyText = "進退有度 · 買 Buy 試探";
-        strategyColor = "bg-egypt-purple/40 border-egypt-purple/60 text-purple-200";
+        strategyColor = "bg-purple-900/40 border-purple-500/60 text-purple-200";
       } else if (capital >= 20000) {
         strategyText = "戰神降臨 · 高倍率攻勢";
         strategyColor = "bg-amber-900/40 border-amber-500/60 text-amber-300";
@@ -395,7 +404,7 @@
       stratElem.className = `text-xs px-3 py-1 rounded-full font-bold border ${strategyColor}`;
     }
 
-    // 4. 觸發召喚神諭 (含動畫)
+    // 4. 召喚神諭動畫
     function triggerOracle() {
       calculateStrategy();
       const overlay = document.getElementById('scanningOverlay');
@@ -409,19 +418,18 @@
 
     function refreshRooms() {
       const randomRoom = '#' + String(Math.floor(Math.random() * 250) + 1).padStart(3, '0');
-      const randomRate = (96 + Math.random() * 3.5).toFixed(1);
+      const randomRate = (96.5 + Math.random() * 3).toFixed(1);
 
       const card1 = document.getElementById('roomContainer').children[0];
       card1.querySelector('.text-4xl').innerText = randomRoom + ' 號房';
       document.getElementById('rateText1').innerText = randomRate + '%';
     }
 
-    // Modal 開關
     function openVipModal() { document.getElementById('vipModal').classList.remove('hidden'); }
     function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
     function closeCardModal() { document.getElementById('cardModal').classList.add('hidden'); }
 
-    // 5. Canvas 生成戰報圖片 (9:16)
+    // 5. 生成 9:16 高清戰報圖
     function generateCardCanvas() {
       const canvas = document.getElementById('reportCanvas');
       const ctx = canvas.getContext('2d');
@@ -430,22 +438,15 @@
       const bet = document.getElementById('resBet').innerText;
       const roomNum = document.getElementById('roomContainer').children[0].querySelector('.text-4xl').innerText;
 
-      // 背景
-      ctx.fillStyle = '#07070A';
+      ctx.fillStyle = '#040406';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 金色裝飾雙框
-      ctx.strokeStyle = '#FFD700';
+      ctx.strokeStyle = '#FFE259';
       ctx.lineWidth = 4;
       ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
 
-      ctx.strokeStyle = '#262636';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(22, 22, canvas.width - 44, canvas.height - 44);
-
-      // Header
-      ctx.fillStyle = '#FFD700';
-      ctx.font = 'black 26px Inter';
+      ctx.fillStyle = '#FFE259';
+      ctx.font = 'black 28px Orbitron';
       ctx.textAlign = 'center';
       ctx.fillText('SETH PROTOCOL', canvas.width / 2, 75);
 
@@ -453,10 +454,9 @@
       ctx.font = '12px Noto Sans TC';
       ctx.fillText('戰神賽特 · 數據儀表板認證戰報', canvas.width / 2, 100);
 
-      // 核心房號框
-      ctx.fillStyle = '#0F0F17';
+      ctx.fillStyle = '#0E0E18';
       ctx.fillRect(40, 135, canvas.width - 80, 185);
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+      ctx.strokeStyle = 'rgba(255, 226, 89, 0.5)';
       ctx.strokeRect(40, 135, canvas.width - 80, 185);
 
       ctx.fillStyle = '#888899';
@@ -464,15 +464,14 @@
       ctx.fillText('今日神諭首選爆分房號', canvas.width / 2, 170);
 
       ctx.fillStyle = '#FFF5C0';
-      ctx.font = 'black 54px Inter';
+      ctx.font = 'black 54px Orbitron';
       ctx.fillText(roomNum, canvas.width / 2, 240);
 
       ctx.fillStyle = '#10B981';
       ctx.font = 'bold 14px Noto Sans TC';
       ctx.fillText('● 爆分訊號：極強 (98.4%)', canvas.width / 2, 285);
 
-      // 數據表格
-      ctx.fillStyle = '#0F0F17';
+      ctx.fillStyle = '#0E0E18';
       ctx.fillRect(40, 340, canvas.width - 80, 180);
 
       ctx.textAlign = 'left';
@@ -484,34 +483,32 @@
 
       ctx.textAlign = 'right';
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 16px Inter';
+      ctx.font = 'bold 16px Orbitron';
       ctx.fillText(capital + ' PTS', canvas.width - 65, 390);
-      ctx.fillStyle = '#FFD700';
+      ctx.fillStyle = '#FFE259';
       ctx.fillText(bet, canvas.width - 65, 435);
-      ctx.fillStyle = '#9333EA';
+      ctx.fillStyle = '#A855F7';
+      ctx.font = 'bold 16px Noto Sans TC';
       ctx.fillText('試探進攻型', canvas.width - 65, 480);
 
-      // 神話金句
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#FFD700';
+      ctx.fillStyle = '#FFE259';
       ctx.font = 'italic 13px Noto Sans TC';
       ctx.fillText('「權杖閃耀之處，乘數必將降臨。」', canvas.width / 2, 565);
 
-      // 下方 QR Code 區域
-      ctx.fillStyle = '#0F0F17';
+      ctx.fillStyle = '#0E0E18';
       ctx.fillRect(40, 620, canvas.width - 80, 260);
 
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 16px Noto Sans TC';
       ctx.fillText('掃碼解鎖 VIP 隱藏爆分房號', canvas.width / 2, 660);
 
-      // 模擬 QR Code
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(canvas.width / 2 - 60, 690, 120, 120);
       ctx.fillStyle = '#000000';
       ctx.fillRect(canvas.width / 2 - 50, 700, 100, 100);
-      ctx.fillStyle = '#FFD700';
-      ctx.font = 'bold 10px Inter';
+      ctx.fillStyle = '#FFE259';
+      ctx.font = 'bold 10px Orbitron';
       ctx.fillText('SETH VIP QR', canvas.width / 2, 755);
 
       ctx.fillStyle = '#888899';
