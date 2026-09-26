@@ -1,1008 +1,409 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>牛老大專屬 · 戰神賽特數據演算法選房終端</title>
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Orbitron & Noto Sans TC -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            neon: {
-              red: '#FF003C',
-              pink: '#FF2A7A',
-              purple: '#B026FF',
-              dark: '#0A0306',
-              card: '#120509',
-              border: '#3D0C18'
-            }
-          },
-          fontFamily: {
-            mono: ['Orbitron', 'monospace'],
-            sans: ['Noto Sans TC', 'sans-serif'],
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>牛老大專屬 - 戰神賽特數據演算法選房終端系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;600;800;900&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans TC', sans-serif;
         }
-      }
-    }
-  </script>
-
-  <style>
-    body {
-      background-color: #070204;
-      color: #F8FAFC;
-      overflow-x: hidden;
-      font-family: 'Noto Sans TC', sans-serif;
-    }
-
-    .neon-solid-text {
-      color: #FF2A7A;
-      text-shadow: 0 0 12px rgba(255, 0, 60, 0.8), 0 0 20px rgba(255, 42, 122, 0.5);
-    }
-
-    .cyber-card {
-      background: rgba(18, 5, 9, 0.85);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 0, 60, 0.3);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 0, 60, 0.1);
-      position: relative;
-    }
-
-    @keyframes borderGlow {
-      0%, 100% { border-color: rgba(255, 0, 60, 0.8); box-shadow: 0 0 20px rgba(255, 0, 60, 0.4), inset 0 0 10px rgba(255, 0, 60, 0.2); }
-      50% { border-color: rgba(176, 38, 255, 0.9); box-shadow: 0 0 35px rgba(176, 38, 255, 0.6), inset 0 0 15px rgba(176, 38, 255, 0.3); }
-    }
-    .animate-border-glow {
-      animation: borderGlow 3s infinite ease-in-out;
-    }
-
-    @keyframes btnPulse {
-      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 0, 60, 0.6)); }
-      50% { transform: scale(1.02); filter: drop-shadow(0 0 25px rgba(255, 0, 60, 0.9)); }
-    }
-    .pulse-btn {
-      animation: btnPulse 2s infinite ease-in-out;
-    }
-
-    .glow-orb-1 {
-      position: fixed;
-      top: 10%; left: 15%;
-      width: 350px; height: 350px;
-      background: radial-gradient(circle, rgba(255,0,60,0.25) 0%, rgba(0,0,0,0) 70%);
-      filter: blur(60px);
-      pointer-events: none;
-      z-index: 0;
-      animation: floatOrb 8s infinite alternate ease-in-out;
-    }
-
-    .glow-orb-2 {
-      position: fixed;
-      bottom: 10%; right: 10%;
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(176,38,255,0.2) 0%, rgba(0,0,0,0) 70%);
-      filter: blur(70px);
-      pointer-events: none;
-      z-index: 0;
-      animation: floatOrb 10s infinite alternate-reverse ease-in-out;
-    }
-
-    @keyframes floatOrb {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(30px, -40px) scale(1.2); }
-    }
-
-    .hover-cyber {
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .hover-cyber:hover {
-      transform: translateY(-3px) scale(1.01);
-      border-color: rgba(255, 0, 60, 1);
-      box-shadow: 0 8px 25px rgba(255, 0, 60, 0.3);
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(18, 5, 9, 0.5);
-      border-radius: 8px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(255, 0, 60, 0.5);
-      border-radius: 8px;
-    }
-
-    /* 跑馬燈動畫 */
-    @keyframes marquee {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-    .animate-marquee {
-      display: inline-block;
-      white-space: nowrap;
-      animation: marquee 25s linear infinite;
-    }
-    .animate-marquee:hover {
-      animation-play-state: paused;
-    }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between relative selection:bg-neon-red selection:text-white">
-
-  <!-- 背景動畫 -->
-  <div class="glow-orb-1"></div>
-  <div class="glow-orb-2"></div>
-  <canvas id="cyberCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
-
-  <!-- 即時戰報跑馬燈 Header (頂部) -->
-  <div class="bg-black/90 border-b border-neon-red/40 py-1.5 px-4 z-50 text-xs font-mono text-pink-300 overflow-hidden flex items-center shadow-lg">
-    <span class="bg-neon-red text-white text-[10px] font-black px-2 py-0.5 rounded mr-3 flex-shrink-0 animate-pulse">
-      <i class="fa-solid fa-bolt mr-1"></i> 即時爆分戰報
-    </span>
-    <div class="overflow-hidden w-full relative flex items-center">
-      <div id="marqueeText" class="animate-marquee font-bold">
-        🔥 [18:24:05] 會員 VIP-88** 於 #087 號房 觸發 500x 暴擊爆分！ 💰 獲利 +124,500 PTS ｜ ⚡ [18:23:41] 會員 VIP-31** 於 #142 號房 進入 Free Game 吐分期！ 💰 獲利 +68,000 PTS ｜ 🎯 [18:22:10] 會員 VIP-90** 於 #209 號房 觸發連爆訊號！ 💰 獲利 +45,200 PTS
-      </div>
-    </div>
-    <!-- 音效開關按鈕 -->
-    <button onclick="toggleAudio()" id="audioToggleBtn" class="ml-3 text-xs bg-black/60 border border-white/20 hover:border-neon-pink px-2.5 py-1 rounded-lg text-gray-300 hover:text-white flex items-center gap-1.5 flex-shrink-0 transition">
-      <i class="fa-solid fa-volume-high text-neon-pink" id="audioIcon"></i>
-      <span class="text-[10px]" id="audioText">音效 ON</span>
-    </button>
-  </div>
-
-  <!-- ==================== 頁面 1: 入口驗證頁面 ==================== -->
-  <div id="gatekeeperPage" class="min-h-screen w-full flex items-center justify-center p-4 z-10 relative">
-    <div class="cyber-card max-w-md w-full rounded-3xl p-8 border-neon-red/60 animate-border-glow shadow-2xl relative overflow-hidden text-center">
-      
-      <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-neon-red via-red-600 to-neon-purple flex items-center justify-center text-white text-4xl shadow-xl shadow-neon-red/50 ring-4 ring-neon-pink animate-pulse mx-auto mb-5">
-        𓁦
-      </div>
-
-      <h1 class="text-2xl font-mono font-black tracking-widest neon-solid-text mb-1">牛老大專屬</h1>
-      <p class="text-xs text-pink-200/80 font-medium mb-6">戰神賽特 · 數據演算法選房終端系統</p>
-
-      <!-- 錯誤提示 -->
-      <div id="authErrorMsg" class="hidden mb-4 p-3 bg-red-950/80 border border-red-500/80 rounded-xl text-red-300 text-xs font-bold animate-bounce">
-        <i class="fa-solid fa-triangle-exclamation mr-1"></i> 通行密碼不正確，請重新輸入！
-      </div>
-
-      <!-- 輸入通行密碼 -->
-      <div class="space-y-4 text-left">
-        <div>
-          <label class="block text-xs font-bold text-gray-300 mb-2">請輸入通行密碼</label>
-          <div class="relative">
-            <input type="password" id="passcodeKey" placeholder="請輸入解鎖密碼..." 
-              class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-white font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner text-sm">
-            <button onclick="verifyPasscode()" class="absolute right-2 top-2 bg-gradient-to-r from-neon-red to-neon-pink hover:brightness-125 text-white text-xs font-black px-4 py-2 rounded-lg transition shadow-md">
-              解鎖驗證
-            </button>
-          </div>
-        </div>
-
-        <div class="relative flex py-2 items-center">
-          <div class="flex-grow border-t border-white/10"></div>
-          <span class="flex-shrink mx-3 text-gray-500 text-[11px] font-mono">OR</span>
-          <div class="flex-grow border-t border-white/10"></div>
-        </div>
-
-        <!-- 免費試用按鈕 -->
-        <button id="trialBtn" onclick="startFreeTrial()" class="w-full bg-black/80 hover:bg-neon-purple/20 border border-neon-purple/60 hover:border-neon-purple text-purple-200 font-bold py-3.5 rounded-xl transition duration-300 flex items-center justify-center space-x-2 text-xs shadow-lg">
-          <i class="fa-solid fa-clock-rotate-left text-neon-purple text-sm animate-pulse"></i>
-          <span id="trialBtnText">免費試用體驗 (限定 10 分鐘)</span>
-        </button>
-      </div>
-
-      <div class="mt-8 text-[10px] text-gray-500 font-mono border-t border-white/10 pt-4">
-        SETH ENGINE v3.5 · DYNAMIC ENCRYPTED ACCESS
-      </div>
-
-    </div>
-  </div>
-
-
-  <!-- ==================== 頁面 2: 選房主終端頁面 ==================== -->
-  <div id="mainDashboardPage" class="hidden min-h-screen flex flex-col justify-between relative z-10">
-    
-    <header class="w-full border-b border-neon-red/40 cyber-card sticky top-0 z-40 backdrop-blur-md">
-      <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
-        <div class="flex items-center space-x-3.5">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-neon-red via-red-600 to-neon-purple flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-neon-red/50 ring-2 ring-neon-pink animate-pulse">
-            𓁦
-          </div>
-          <div>
-            <h1 class="text-xl font-mono font-black tracking-widest neon-solid-text flex items-center gap-2">
-              牛老大專屬 <span id="userRoleBadge" class="bg-gradient-to-r from-neon-red to-neon-purple text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal shadow-md shadow-neon-red/40">VIP 完整解鎖</span>
-            </h1>
-            <p class="text-[11px] text-pink-200/80 font-medium">戰神賽特 · 數據演算法選房終端</p>
-          </div>
-        </div>
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
         
-        <div class="flex items-center space-x-3">
-          <div id="trialBadge" class="hidden bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1.5 rounded-full font-mono font-bold animate-pulse">
-            <i class="fa-solid fa-stopwatch mr-1"></i> 試用剩餘: <span id="trialTimer">10:00</span>
-          </div>
-          <a href="https://lin.ee/W2g5kgf" target="_blank" class="hidden sm:flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2 rounded-full shadow-lg transition duration-300 hover:scale-105 border border-emerald-300">
-            <i class="fa-brands fa-line text-lg"></i>
-            <span>LINE 官方客服</span>
-          </a>
+        /* 深紅至極致暗黑漸層背景 */
+        body {
+            background: radial-gradient(circle at center, #3b0712 0%, #1a0308 55%, #050002 100%);
+            color: #fecdd3;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 戰神奢華紅漸層文字效果 */
+        .text-red-gradient {
+            background: linear-gradient(135deg, #fff1f2 0%, #ff4d6d 35%, #c9184a 70%, #ff758f 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(255, 77, 109, 0.4);
+        }
+
+        /* 霓虹紅磨砂玻璃卡片 */
+        .crimson-card {
+            background: rgba(18, 4, 8, 0.82);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 77, 109, 0.35);
+            box-shadow: 0 0 40px rgba(225, 29, 72, 0.22),
+                        inset 0 0 20px rgba(255, 77, 109, 0.08);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .crimson-card:hover {
+            border-color: rgba(255, 77, 109, 0.7);
+            box-shadow: 0 0 60px rgba(225, 29, 72, 0.38),
+                        inset 0 0 30px rgba(255, 77, 109, 0.15);
+        }
+
+        /* 霓虹亮紅強烈按鈕 */
+        .btn-crimson {
+            background: linear-gradient(135deg, #ff4d6d 0%, #e60039 50%, #800020 100%);
+            color: #ffffff;
+            font-weight: 800;
+            box-shadow: 0 0 20px rgba(230, 0, 57, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .btn-crimson:hover {
+            background: linear-gradient(135deg, #ff758f 0%, #ff1a4d 50%, #a30029 100%);
+            box-shadow: 0 0 30px rgba(255, 77, 109, 0.8);
+            transform: translateY(-1px);
+        }
+
+        /* 幽暗霓虹紅外框按鈕 */
+        .btn-outline-crimson {
+            background: rgba(35, 6, 13, 0.6);
+            border: 1px solid rgba(255, 77, 109, 0.4);
+            color: #ffe4e6;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-crimson:hover {
+            border-color: #ff4d6d;
+            background: rgba(70, 10, 25, 0.75);
+            box-shadow: 0 0 22px rgba(225, 29, 72, 0.4);
+            color: #ffffff;
+        }
+
+        /* 全螢幕 Canvas 粒子與雷射光流 */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 走馬燈遮罩邊緣 */
+        .marquee-container {
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between relative selection:bg-rose-600 selection:text-white">
+
+    <!-- 動態深紅粒子與科幻光雨 Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- 頂部資訊列 -->
+    <header class="relative z-10 w-full px-4 py-3 flex justify-between items-center bg-black/50 backdrop-blur-md border-b border-rose-500/20">
+        <!-- 左側：即時勝分戰報走馬燈 -->
+        <div class="flex items-center space-x-2 text-xs md:text-sm">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/15 border border-rose-500/50 text-rose-300 animate-pulse">
+                <svg class="w-3.5 h-3.5 mr-1 text-rose-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                </svg>
+                即時勝分戰報
+            </span>
+            <div class="hidden sm:block marquee-container overflow-hidden w-48 md:w-80 h-5 relative">
+                <div class="absolute whitespace-nowrap text-rose-200/80 text-xs font-orbitron animate-[marquee_12s_linear_infinite]" id="tickerText">
+                    VIP-88** 剛剛於 #08 號房獲利 +$128,400 | 會員 VIP-99** 觸發神話連爆 +$350,000
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div class="bg-black/80 border-t border-neon-red/30 text-[11px] py-2 px-4 text-gray-300 flex justify-between overflow-x-auto whitespace-nowrap backdrop-blur-md">
-        <div class="flex space-x-8 mx-auto items-center font-mono">
-          <span><i class="fa-solid fa-bolt text-neon-red mr-1.5 animate-pulse"></i> API 延遲: <strong id="pingText" class="text-emerald-400">8ms</strong></span>
-          <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 防護等級: <strong class="text-cyan-400">動態加密全開</strong></span>
-          <span><i class="fa-solid fa-users text-neon-purple mr-1.5"></i> 在線人數: <strong id="onlineCount" class="text-purple-300">3,450 人</strong></span>
-          <span><i class="fa-solid fa-fire text-neon-pink mr-1.5"></i> 熱門爆分池: <strong class="text-neon-pink">#087, #142, #209</strong></span>
-        </div>
-      </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 mt-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow z-10">
-      
-      <!-- 左側：試算區 & 風控止盈止損 -->
-      <section class="lg:col-span-5 flex flex-col space-y-6">
-        <div class="cyber-card rounded-2xl p-6 border-neon-red/50 animate-border-glow overflow-hidden">
-          <h2 class="text-base font-bold text-white flex items-center justify-between mb-5 border-b border-neon-red/30 pb-3">
-            <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-neon-red text-lg"></i> 本金戰術與風控試算</span>
-            <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/40 font-mono font-bold shadow-sm shadow-neon-red/30">AI ENGINE</span>
-          </h2>
-
-          <div class="mb-5">
-            <label class="block text-xs text-gray-300 mb-2 font-medium">請輸入您的預算本金 (分/元)</label>
-            <div class="relative">
-              <input type="number" id="capitalInput" value="5000" placeholder="例如: 5000" 
-                class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-2xl font-black text-neon-pink font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner">
-              <span class="absolute right-4 top-4 text-xs text-neon-pink/70 font-bold font-mono">PTS</span>
-            </div>
-            <div class="grid grid-cols-4 gap-2 mt-3 font-mono">
-              <button onclick="setCapital(1000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">1,000</button>
-              <button onclick="setCapital(5000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">5,000</button>
-              <button onclick="setCapital(10000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">10,000</button>
-              <button onclick="setCapital(30000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">30,000</button>
-            </div>
-          </div>
-
-          <div class="bg-black/70 border border-neon-red/30 rounded-xl p-4.5 space-y-3.5 shadow-lg">
-            <div class="flex justify-between items-center text-sm">
-              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-coins text-neon-pink"></i> 推薦平打單注</span>
-              <span id="resBet" class="font-black text-neon-pink text-xl font-mono drop-shadow">24 分</span>
-            </div>
-            <div class="flex justify-between items-center text-sm">
-              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-400"></i> 預計防禦轉數</span>
-              <span id="resSpins" class="font-bold text-emerald-400 text-base font-mono">208 轉</span>
+        <!-- 右側：會員狀態與音效切換 -->
+        <div class="flex items-center space-x-3 text-xs md:text-sm font-orbitron">
+            <div class="flex items-center space-x-1.5 text-rose-200 bg-rose-950/60 px-3 py-1 rounded-lg border border-rose-500/30">
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                <span class="text-xs">[<span id="currentTime">18:24:05</span>] 會員 <span class="text-rose-400 font-bold">VIP-88**</span> 於 <span class="text-rose-400">#08</span></span>
             </div>
             
-            <!-- 新增：風控止盈/止損機制 -->
-            <div class="pt-2 border-t border-white/10 grid grid-cols-2 gap-2 text-xs font-mono">
-              <div class="bg-emerald-950/40 border border-emerald-500/40 p-2 rounded-lg flex flex-col justify-center">
-                <span class="text-gray-400 text-[10px]"><i class="fa-solid fa-arrow-trend-up text-emerald-400 mr-1"></i>建議目標止盈 (+150%)</span>
-                <span id="resTargetProfit" class="text-emerald-400 font-black text-sm mt-0.5">12,500 PTS</span>
-              </div>
-              <div class="bg-red-950/40 border border-red-500/40 p-2 rounded-lg flex flex-col justify-center">
-                <span class="text-gray-400 text-[10px]"><i class="fa-solid fa-arrow-trend-down text-red-400 mr-1"></i>建議極限止損 (-30%)</span>
-                <span id="resStopLoss" class="text-red-400 font-black text-sm mt-0.5">3,500 PTS</span>
-              </div>
-            </div>
-
-            <div class="flex justify-between items-center text-sm pt-2 border-t border-white/10">
-              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-sliders text-neon-purple"></i> 建議進攻打法</span>
-              <span id="resStrategy" class="bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1 rounded-full font-bold shadow-sm shadow-purple-500/30">進退有度 · 買 Buy 試探</span>
-            </div>
-          </div>
-
-          <button onclick="triggerOracle()" class="w-full mt-6 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black py-4 rounded-xl shadow-xl shadow-neon-red/40 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95 border border-pink-300 pulse-btn">
-            <i class="fa-solid fa-calculator text-lg"></i>
-            <span>計算最適打法</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- 右側：房號區 (包含三色爆分燈號 + 走勢圖 + 一鍵複製) -->
-      <section class="lg:col-span-7 flex flex-col space-y-6">
-        <div class="cyber-card rounded-2xl p-6 flex-grow flex flex-col justify-between overflow-hidden">
-          
-          <div id="scanningOverlay" class="absolute inset-0 bg-black/95 backdrop-blur-md z-30 flex flex-col items-center justify-center hidden">
-            <div class="relative w-24 h-24 flex items-center justify-center mb-4">
-              <div class="absolute inset-0 rounded-full border-4 border-neon-red/20 border-t-neon-red animate-spin"></div>
-              <div class="absolute inset-2 rounded-full border-2 border-cyan-400/20 border-b-cyan-400 animate-spin" style="animation-direction: reverse;"></div>
-              <span class="text-4xl animate-pulse text-neon-pink">𓁦</span>
-            </div>
-            <div class="text-neon-pink font-mono font-bold text-lg tracking-widest animate-pulse">OPTIMIZING STRATEGY...</div>
-            <p class="text-xs text-gray-400 mt-2 font-mono">RE-CALCULATING 10 VIP ROOMS &amp; SEED POOLS...</p>
-          </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-4 border-b border-neon-red/30 pb-3">
-              <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-door-open text-neon-red text-lg"></i> 系統推薦勝率房號 (主推 + 10間 VIP)
-              </h2>
-              <div class="flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span class="text-xs text-emerald-400 font-mono font-bold">LIVE MONITORING</span>
-              </div>
-            </div>
-
-            <!-- 首選主推房 -->
-            <div class="mb-5 bg-black/80 border border-neon-red/80 rounded-2xl p-4.5 hover-cyber group relative overflow-hidden shadow-lg">
-              <div class="flex justify-between items-start">
-                <div>
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/50 font-bold shadow-sm shadow-neon-red/30">首選勝率帝王房</span>
-                    <!-- 爆分三色指示燈 -->
-                    <span class="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 px-2 py-0.5 rounded font-bold flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 吐分高峰期
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <div id="mainRoomNum" class="text-3xl font-black text-white mt-1 font-mono tracking-tight group-hover:text-neon-pink transition drop-shadow">#087 號房</div>
-                    <button onclick="copyToClipboard('#087')" class="text-xs text-gray-400 hover:text-neon-pink transition bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-md border border-white/10">
-                      <i class="fa-regular fa-copy mr-1"></i>複製
-                    </button>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <div class="text-xs text-gray-400 font-medium">爆分預測指數</div>
-                  <div id="rateText1" class="text-2xl font-black text-emerald-400 font-mono mt-1 drop-shadow">98.8%</div>
-                </div>
-              </div>
-              
-              <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
-                <span class="text-gray-300 flex items-center gap-1"><i class="fa-solid fa-fire text-neon-pink animate-pulse"></i> 高倍數乘數訊號極強</span>
-                <a href="https://cvv005.mw168.online" target="_blank" class="bg-neon-red/20 hover:bg-neon-red text-neon-pink hover:text-white border border-neon-red/60 font-bold px-3.5 py-1.5 rounded-lg transition shadow-md">前往機台 ➔</a>
-              </div>
-            </div>
-
-            <!-- VIP 10 間 -->
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-crown text-neon-purple"></i> VIP 獨家爆分房池 (共 10 間)
-              </span>
-              <span class="text-[10px] text-gray-400">上下滑動查看更多 🠇</span>
-            </div>
-
-            <div id="vipRoomContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
-            </div>
-          </div>
-
-          <div class="mt-6 pt-4 border-t border-neon-red/30">
-            <button onclick="generateCardCanvas()" class="w-full bg-gradient-to-r from-black via-zinc-900 to-black hover:from-zinc-900 hover:to-zinc-900 text-neon-pink border border-neon-pink/60 py-3.5 rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-neon-red/30">
-              <i class="fa-solid fa-image text-neon-pink text-lg animate-pulse"></i>
-              <span>一鍵生成『戰神幸運戰報卡』圖片</span>
+            <button id="soundBtn" onclick="toggleSound()" class="flex items-center space-x-1 px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition-all">
+                <svg id="soundIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                </svg>
+                <span class="text-xs font-bold" id="soundStatus">音效 ON</span>
             </button>
-          </div>
-
         </div>
-      </section>
+    </header>
 
+    <!-- 中央核心驗證卡片 -->
+    <main class="relative z-10 flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-md crimson-card rounded-2xl p-8 text-center relative overflow-hidden">
+            <!-- 暗紅霓虹頂部線條 -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-80"></div>
+
+            <!-- 戰神賽特奢華紅 Logo 區塊 -->
+            <div class="mx-auto w-20 h-20 mb-5 rounded-2xl bg-gradient-to-br from-rose-400 via-rose-700 to-rose-950 p-[1.5px] shadow-lg shadow-rose-600/30">
+                <div class="w-full h-full bg-stone-950 rounded-[14px] flex items-center justify-center relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-rose-600/15 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <!-- 戰術/戰神頭盔標誌 -->
+                    <svg class="w-11 h-11 text-rose-500 drop-shadow-[0_2px_12px_rgba(244,63,94,0.6)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M12 2L4 6v6c0 5.25 3.75 10 8 11 4.25-1 8-5.75 8-11V6l-8-4z" fill="rgba(225,29,72,0.18)"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8c1.5-2 3.5-2.5 5-1 1.5-1.5 3.5-1 5 1M8 12c0 2 1.8 3.5 4 3.5s4-1.5 4-3.5M12 11v4.5"/>
+                        <circle cx="12" cy="12" r="1.2" fill="#ff4d6d"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 主標題與說明文字 -->
+            <h1 class="text-3xl font-black tracking-wider text-red-gradient mb-1">
+                牛老大專屬
+            </h1>
+            <p class="text-xs text-rose-200/70 tracking-widest font-medium mb-8">
+                戰神賽特 · 數據演算法選房終端系統
+            </p>
+
+            <!-- 輸入密碼與按鈕 -->
+            <div class="space-y-4">
+                <div class="text-left">
+                    <label class="block text-xs font-semibold text-rose-300/80 mb-1.5 pl-1">
+                        請輸入通行密碼
+                    </label>
+                    <div class="relative flex items-center">
+                        <input 
+                            type="password" 
+                            id="passcode" 
+                            placeholder="請輸入解鎖密碼..." 
+                            class="w-full px-4 py-3 bg-stone-950/90 border border-rose-500/35 rounded-xl text-rose-100 placeholder-rose-900/60 text-sm focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400/50 transition-all pr-24"
+                        >
+                        <button 
+                            onclick="verifyPassword()" 
+                            class="absolute right-1.5 px-4 py-1.5 btn-crimson text-xs rounded-lg font-bold tracking-wide"
+                        >
+                            解鎖驗證
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 分隔線 -->
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-rose-500/20"></div>
+                    <span class="flex-shrink mx-3 text-[10px] text-rose-400/50 uppercase font-orbitron tracking-widest">OR</span>
+                    <div class="flex-grow border-t border-rose-500/20"></div>
+                </div>
+
+                <!-- 免費試用按鈕 -->
+                <button 
+                    onclick="startTrial()" 
+                    class="w-full py-3 px-4 btn-outline-crimson rounded-xl text-xs font-bold flex items-center justify-center space-x-2 group"
+                >
+                    <svg class="w-4 h-4 text-rose-400 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>免費試用體驗（限定 10 分鐘）</span>
+                </button>
+            </div>
+
+            <!-- 訊息提示框 -->
+            <div id="messageBox" class="mt-4 hidden p-2.5 rounded-lg text-xs font-medium border text-center transition-all"></div>
+
+            <!-- 底部系統版本標誌 -->
+            <div class="mt-8 pt-4 border-t border-rose-950/60 text-[11px] text-rose-400/40 font-orbitron tracking-widest">
+                SETH ENGINE V3.5 · DYNAMIC ENCRYPTED ACCESS
+            </div>
+        </div>
     </main>
 
-    <footer class="mt-10 py-4 border-t border-neon-red/30 text-center text-xs text-gray-500 z-10 font-mono">
-      <p>© 2026 牛老大專屬 PROTOCOL · 僅供娛樂數據分析參考，請理性娛樂。</p>
+    <!-- 頁尾 -->
+    <footer class="relative z-10 w-full text-center py-3 text-[11px] text-stone-600 font-orbitron">
+        © 2026 BOSS NIU VIP SYSTEM. ALL RIGHTS RESERVED.
     </footer>
-  </div>
 
-
-  <!-- ==================== Modal 1: 管理員控制台 (輸入 aimincvv168 開啟) ==================== -->
-  <div id="adminModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="cyber-card max-w-md w-full rounded-2xl p-6 relative border-neon-red/80 shadow-2xl">
-      <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-
-      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-neon-red/40">
-        <div class="w-10 h-10 rounded-xl bg-neon-red/20 border border-neon-red flex items-center justify-center text-neon-pink text-xl">
-          <i class="fa-solid fa-user-shield"></i>
-        </div>
-        <div>
-          <h3 class="text-lg font-black text-white">管理員發行控制台</h3>
-          <p class="text-[11px] text-gray-400 font-mono">ADMIN: aimincvv168</p>
-        </div>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-300 mb-2">新增發行通行密碼</label>
-          <div class="flex space-x-2">
-            <input type="text" id="newPasscodeKey" placeholder="例如: VIP999" 
-              class="flex-1 bg-black/80 border border-neon-purple/60 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-neon-pink">
-            <button onclick="addNewPasscode()" class="bg-gradient-to-r from-neon-purple to-neon-pink hover:brightness-125 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md">
-              發行密碼
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-gray-300 mb-2">已發行密碼清單</label>
-          <div id="issuedPasscodesList" class="bg-black/60 border border-white/10 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2 font-mono text-xs">
-          </div>
-        </div>
-
-        <button onclick="closeAdminModal(); enterDashboard(true);" class="w-full bg-neon-red hover:bg-red-600 text-white font-bold py-3 rounded-xl transition text-xs shadow-lg mt-2">
-          進入主選房系統 (管理者權限) ➔
-        </button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- ==================== Modal 2: 免費試用專用 - LINE 官方領取通行碼 ==================== -->
-  <div id="vipModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="cyber-card max-w-sm w-full rounded-2xl p-6 text-center relative border-emerald-500/80">
-      <button onclick="closeVipModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-
-      <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-400 text-3xl shadow-lg shadow-emerald-500/40 animate-pulse">
-        <i class="fa-brands fa-line"></i>
-      </div>
-
-      <h3 class="text-xl font-black text-white mb-2">解鎖 VIP 獨家爆分房號</h3>
-      <p class="text-xs text-gray-300 leading-relaxed mb-6">
-        您當前為 <strong class="text-neon-purple">免費試用體驗模式</strong>。<br>
-        監控顯示 <strong id="modalRoomTag" class="text-neon-pink">VIP 房號</strong> 的咬度回饋率高達 <strong id="modalRateTag" class="text-emerald-400">99.2%</strong>！<br><br>
-        請加入 <strong class="text-emerald-400">LINE 官方帳號</strong> 即可免費領取永久通行密碼解鎖完整內容！
-      </p>
-
-      <a href="https://lin.ee/W2g5kgf" target="_blank" class="w-full block bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl shadow-lg shadow-emerald-600/40 transition duration-300 mb-3 border border-emerald-300 flex items-center justify-center space-x-2">
-        <i class="fa-brands fa-line text-xl"></i>
-        <span>加入 LINE 官方領取通行密碼</span>
-      </a>
-
-      <button onclick="closeVipModal()" class="text-xs text-gray-500 hover:underline">返回試用頁面</button>
-    </div>
-  </div>
-
-
-  <!-- ==================== Modal 3: 戰報卡 ==================== -->
-  <div id="cardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
-    <div class="max-w-md w-full flex flex-col items-center my-auto">
-      <div class="rounded-xl overflow-hidden cyber-card border-neon-red shadow-2xl mb-4">
-        <canvas id="reportCanvas" width="540" height="960" class="w-[270px] h-[480px] sm:w-[320px] sm:h-[568px]"></canvas>
-      </div>
-
-      <div class="flex space-x-3 w-full max-w-xs">
-        <button onclick="downloadCanvas()" class="flex-1 bg-neon-red hover:bg-red-600 text-white font-black py-3 rounded-xl text-sm transition shadow-lg shadow-neon-red/40">
-          <i class="fa-solid fa-download mr-1"></i> 下載高清圖片
-        </button>
-        <button onclick="closeCardModal()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold px-5 py-3 rounded-xl text-sm transition">
-          關閉
-        </button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- JS 邏輯核心 -->
-  <script>
-    // 預設密碼庫
-    let validPasscodes = ["SETH888", "VIP888", "SETH999"];
-    const adminAccount = "aimincvv168";
-    let isFullUnlocked = false; 
-    let audioEnabled = true;
-
-    // Web Audio API 音效生成器 (無需外部 MP3 檔案)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playBeep(freq = 600, type = 'sine', duration = 0.08) {
-      if (!audioEnabled) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch(e) {}
-    }
-
-    function toggleAudio() {
-      audioEnabled = !audioEnabled;
-      const icon = document.getElementById('audioIcon');
-      const text = document.getElementById('audioText');
-      if (audioEnabled) {
-        icon.className = 'fa-solid fa-volume-high text-neon-pink';
-        text.innerText = '音效 ON';
-        playBeep(800, 'sine', 0.1);
-      } else {
-        icon.className = 'fa-solid fa-volume-xmark text-gray-500';
-        text.innerText = '音效 OFF';
-      }
-    }
-
-    // 複製到剪貼簿功能
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        playBeep(1200, 'triangle', 0.1);
-        alert(`已成功複製房號: ${text}`);
-      });
-    }
-
-    const allowedBets = [
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 30, 32, 36, 
-      40, 42, 48, 54, 56, 60, 64, 72, 80, 96, 100, 112, 120, 128, 140, 144, 
-      160, 180, 200, 240, 280, 300, 320, 360, 400, 420, 480, 500, 540, 560, 
-      600, 640, 700, 720, 800, 840, 900, 960, 980, 1000, 1080, 1120, 1200, 
-      1280, 1400, 1440, 1600, 1800, 2000
-    ];
-
-    window.addEventListener('DOMContentLoaded', () => {
-      checkTrialStatus();
-    });
-
-    function checkTrialStatus() {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const usedDate = localStorage.getItem('seth_trial_used_date');
-
-      if (usedDate === todayStr) {
-        const trialBtn = document.getElementById('trialBtn');
-        const trialText = document.getElementById('trialBtnText');
-        trialBtn.disabled = true;
-        trialBtn.classList.remove('hover:bg-neon-purple/20', 'hover:border-neon-purple', 'text-purple-200');
-        trialBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-900', 'border-gray-700', 'text-gray-500');
-        trialText.innerText = '今日試用額度已使用 (請輸入密碼登入)';
-      }
-    }
-
-    function verifyPasscode() {
-      playBeep(800, 'sine', 0.1);
-      const input = document.getElementById('passcodeKey').value.trim();
-      const errBox = document.getElementById('authErrorMsg');
-
-      if (input === adminAccount) {
-        errBox.classList.add('hidden');
-        openAdminModal();
-        return;
-      }
-
-      if (validPasscodes.includes(input)) {
-        errBox.classList.add('hidden');
-        enterDashboard(true);
-      } else {
-        errBox.classList.remove('hidden');
-        playBeep(300, 'sawtooth', 0.2);
-      }
-    }
-
-    function startFreeTrial() {
-      playBeep(900, 'sine', 0.1);
-      const todayStr = new Date().toISOString().split('T')[0];
-      const usedDate = localStorage.getItem('seth_trial_used_date');
-
-      if (usedDate === todayStr) {
-        alert('您今日的 10 分鐘免費試用已使用完畢！請輸入通行密碼繼續使用。');
-        return;
-      }
-
-      document.getElementById('trialBadge').classList.remove('hidden');
-      enterDashboard(false);
-
-      let timeLeft = 600;
-      const timerElem = document.getElementById('trialTimer');
-
-      const interval = setInterval(() => {
-        timeLeft--;
-        let mins = Math.floor(timeLeft / 60);
-        let secs = timeLeft % 60;
-        timerElem.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-        if (timeLeft <= 0) {
-          clearInterval(interval);
-          localStorage.setItem('seth_trial_used_date', todayStr);
-          alert('您的 10 分鐘免費試用已結束！系統已自動剔除。請輸入通行密碼領取完整體驗權限。');
-          location.reload();
+    <script>
+        // 即時時間更新
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            document.getElementById('currentTime').textContent = timeStr;
         }
-      }, 1000);
-    }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-    function enterDashboard(fullUnlocked = false) {
-      isFullUnlocked = fullUnlocked;
-      
-      const roleBadge = document.getElementById('userRoleBadge');
-      if (isFullUnlocked) {
-        roleBadge.innerText = 'VIP 完整權限解鎖';
-        roleBadge.className = 'bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal shadow-md shadow-emerald-600/40';
-      } else {
-        roleBadge.innerText = '免費體驗模式';
-        roleBadge.className = 'bg-neon-purple/50 text-purple-200 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal border border-neon-purple/60';
-      }
-
-      document.getElementById('gatekeeperPage').classList.add('hidden');
-      document.getElementById('mainDashboardPage').classList.remove('hidden');
-      calculateStrategy();
-      renderVipRooms();
-    }
-
-    function openAdminModal() {
-      renderIssuedPasscodes();
-      document.getElementById('adminModal').classList.remove('hidden');
-    }
-    function closeAdminModal() {
-      document.getElementById('adminModal').classList.add('hidden');
-    }
-
-    function addNewPasscode() {
-      const newKey = document.getElementById('newPasscodeKey').value.trim();
-      if (newKey && !validPasscodes.includes(newKey)) {
-        validPasscodes.push(newKey);
-        document.getElementById('newPasscodeKey').value = '';
-        renderIssuedPasscodes();
-        alert(`成功發行密碼: ${newKey}`);
-      }
-    }
-
-    function renderIssuedPasscodes() {
-      const list = document.getElementById('issuedPasscodesList');
-      list.innerHTML = '';
-      validPasscodes.forEach((code, idx) => {
-        const item = document.createElement('div');
-        item.className = 'flex justify-between items-center bg-white/5 p-2 rounded-lg border border-white/5';
-        item.innerHTML = `
-          <span class="text-neon-pink font-bold">${code}</span>
-          <span class="text-[10px] text-gray-400">有效密碼 #${idx + 1}</span>
-        `;
-        list.appendChild(item);
-      });
-    }
-
-    // 駭客任務風格 數據矩陣雨背景
-    const canvas = document.getElementById('cyberCanvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    const matrixChars = '01SETH𓁦𓃭𓋹𓍝9876543210';
-
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    for (let i = 0; i < 70; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2.5 + 1.2,
-        speedY: Math.random() * 2.5 + 0.8,
-        opacity: Math.random() * 0.7 + 0.3,
-        color: Math.random() > 0.3 ? '#FF003C' : '#B026FF',
-        char: matrixChars[Math.floor(Math.random() * matrixChars.length)]
-      });
-    }
-
-    function animateBg() {
-      ctx.fillStyle = 'rgba(7, 2, 4, 0.2)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      particles.forEach(p => {
-        p.y += p.speedY;
-        if (p.y > canvas.height) p.y = 0;
-        
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.opacity;
-        ctx.font = `${p.size * 8}px Orbitron`;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = p.color;
-        ctx.fillText(p.char, p.x, p.y);
-
-        if (Math.random() < 0.02) {
-          p.char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-        }
-      });
-      requestAnimationFrame(animateBg);
-    }
-    animateBg();
-
-    setInterval(() => {
-      document.getElementById('pingText').innerText = (7 + Math.floor(Math.random() * 5)) + 'ms';
-      document.getElementById('onlineCount').innerText = (3400 + Math.floor(Math.random() * 90)).toLocaleString() + ' 人';
-    }, 2500);
-
-    // 試算邏輯 & 止盈止損計算
-    function setCapital(val) {
-      playBeep(700, 'sine', 0.05);
-      document.getElementById('capitalInput').value = val;
-      calculateStrategy();
-    }
-
-    function calculateStrategy() {
-      const capital = parseFloat(document.getElementById('capitalInput').value) || 0;
-      if (capital <= 0) return;
-
-      let target = capital / 200;
-      let bet = allowedBets[0];
-
-      for (let i = allowedBets.length - 1; i >= 0; i--) {
-        if (allowedBets[i] <= target) {
-          bet = allowedBets[i];
-          break;
-        }
-      }
-
-      let spins = Math.floor(capital / bet);
-
-      // 風控金額計算
-      let targetProfit = Math.floor(capital * 2.5).toLocaleString() + ' PTS';
-      let stopLoss = Math.floor(capital * 0.7).toLocaleString() + ' PTS';
-
-      document.getElementById('resTargetProfit').innerText = targetProfit;
-      document.getElementById('resStopLoss').innerText = stopLoss;
-
-      let strategyText = "平穩防守 · 慢磨訊號";
-      let strategyColor = "bg-blue-900/40 border-blue-500/60 text-blue-300";
-
-      if (capital >= 5000 && capital < 20000) {
-        strategyText = "進退有度 · 買 Buy 試探";
-        strategyColor = "bg-purple-900/40 border-purple-500/60 text-purple-200";
-      } else if (capital >= 20000) {
-        strategyText = "高倍攻勢 · 積極打法";
-        strategyColor = "bg-red-900/40 border-red-500/60 text-red-300";
-      }
-
-      document.getElementById('resBet').innerText = bet + " 分";
-      document.getElementById('resSpins').innerText = spins + " 轉";
-      
-      const stratElem = document.getElementById('resStrategy');
-      stratElem.innerText = strategyText;
-      stratElem.className = `text-xs px-3 py-1 rounded-full font-bold border ${strategyColor}`;
-    }
-
-    // SVG 歷史走勢微圖生成器 (Sparkline)
-    function generateSparklineSVG(color = '#10B981') {
-      let points = [];
-      let y = 18;
-      for (let x = 0; x <= 80; x += 10) {
-        y += Math.floor(Math.random() * 12) - 5;
-        if (y < 5) y = 5;
-        if (y > 30) y = 30;
-        points.push(`${x},${y}`);
-      }
-      return `
-        <svg class="w-16 h-8 overflow-visible" viewBox="0 0 80 35">
-          <polyline fill="none" stroke="${color}" stroke-width="2" points="${points.join(' ')}" />
-        </svg>
-      `;
-    }
-
-    // 房號卡片標籤與三色燈號狀態
-    const vipStatusList = [
-      { text: "吐分期", color: "emerald", tag: "吐分高峰" },
-      { text: "吐分期", color: "emerald", tag: "連爆訊號" },
-      { text: "觀望期", color: "yellow", tag: "蓄勢待發" },
-      { text: "吐分期", color: "emerald", tag: "大戶熱卡" },
-      { text: "觀望期", color: "yellow", tag: "波動平穩" },
-      { text: "蓄力期", color: "red", tag: "咬度累積" },
-      { text: "吐分期", color: "emerald", tag: "買Buy高回報" },
-      { text: "吐分期", color: "emerald", tag: "極高吐分" },
-      { text: "觀望期", color: "yellow", tag: "訊號觀察" },
-      { text: "吐分期", color: "emerald", tag: "爆發前夕" }
-    ];
-
-    function renderVipRooms() {
-      const vipContainer = document.getElementById('vipRoomContainer');
-      vipContainer.innerHTML = '';
-
-      for (let i = 1; i <= 10; i++) {
-        const rate = (97.0 + Math.random() * 2.8).toFixed(1);
-        const status = vipStatusList[i - 1];
-        const realRoomNumber = '#' + String((i * 19 + 7) % 240 + 1).padStart(3, '0');
-
-        let badgeStyle = "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
-        let dotStyle = "bg-emerald-400";
-        let strokeColor = "#10B981";
-
-        if (status.color === "yellow") {
-          badgeStyle = "bg-yellow-500/20 text-yellow-300 border-yellow-500/40";
-          dotStyle = "bg-yellow-400";
-          strokeColor = "#FBBF24";
-        } else if (status.color === "red") {
-          badgeStyle = "bg-red-500/20 text-red-300 border-red-500/40";
-          dotStyle = "bg-red-400";
-          strokeColor = "#EF4444";
+        // 音效控制狀態
+        let soundEnabled = true;
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const statusText = document.getElementById('soundStatus');
+            statusText.textContent = soundEnabled ? '音效 ON' : '音效 OFF';
+            showMessage(soundEnabled ? '音效已開啟' : '音效已靜音', 'info');
         }
 
-        const sparkline = generateSparklineSVG(strokeColor);
-        const card = document.createElement('div');
-        card.className = 'bg-black/80 border border-neon-purple/40 rounded-xl p-3.5 hover-cyber relative overflow-hidden shadow-md flex flex-col justify-between';
-        
-        if (isFullUnlocked) {
-          card.innerHTML = `
-            <div class="flex justify-between items-start">
-              <div>
-                <div class="flex items-center gap-1.5 mb-1">
-                  <span class="text-[9px] px-2 py-0.5 rounded border font-bold ${badgeStyle}">
-                    <span class="w-1.5 h-1.5 rounded-full ${dotStyle} inline-block mr-1"></span>${status.text} · ${status.tag}
-                  </span>
-                </div>
-                <div class="flex items-center gap-2 mt-1">
-                  <div class="text-xl font-black text-white font-mono tracking-tight text-neon-pink">${realRoomNumber} 號房</div>
-                  <button onclick="copyToClipboard('${realRoomNumber}')" class="text-[10px] text-gray-400 hover:text-neon-pink bg-white/5 hover:bg-white/10 px-1.5 py-0.5 rounded border border-white/10">
-                    複製
-                  </button>
-                </div>
-              </div>
-              <div class="text-right flex flex-col items-end">
-                <div class="text-[10px] text-gray-400">走勢 / 咬度率</div>
-                <div class="flex items-center gap-2 mt-0.5">
-                  ${sparkline}
-                  <span class="text-base font-black text-emerald-400 font-mono">${rate}%</span>
-                </div>
-              </div>
-            </div>
-            <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-[11px]">
-              <span class="text-emerald-400 font-mono text-[10px]">● 已監控數據源</span>
-              <a href="https://cvv005.mw168.online" target="_blank" class="bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white px-2.5 py-1 rounded-lg border border-emerald-500/50 font-bold transition">
-                進入機台 ➔
-              </a>
-            </div>
-          `;
-        } else {
-          card.innerHTML = `
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[9px] px-2 py-0.5 rounded border font-bold ${badgeStyle}">
-                  <span class="w-1.5 h-1.5 rounded-full ${dotStyle} inline-block mr-1"></span>${status.text} · ${status.tag}
-                </span>
-                <div class="text-2xl font-black text-gray-500 mt-2 font-mono blur-sm select-none">#??? 號房</div>
-              </div>
-              <div class="text-right">
-                <div class="text-[10px] text-gray-400">爆分預測</div>
-                <div class="text-lg font-black text-neon-purple font-mono mt-0.5">${rate}%</div>
-              </div>
-            </div>
-            <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-[11px]">
-              <span class="text-gray-400 font-mono text-[10px]">內部編號 #???</span>
-              <button onclick="openVipModal('VIP ${i}', '${rate}%')" class="bg-neon-purple/30 hover:bg-neon-purple text-purple-200 hover:text-white px-2.5 py-1 rounded-lg border border-neon-purple/50 font-bold transition">
-                解鎖房號
-              </button>
-            </div>
-          `;
+        // 訊息顯示提示
+        function showMessage(msg, type = 'info') {
+            const box = document.getElementById('messageBox');
+            box.classList.remove('hidden', 'bg-red-500/20', 'border-red-500/40', 'text-red-300', 'bg-rose-500/20', 'border-rose-500/40', 'text-rose-300');
+            
+            if (type === 'error') {
+                box.classList.add('bg-red-950/80', 'border-red-500/50', 'text-red-200');
+            } else {
+                box.classList.add('bg-rose-950/80', 'border-rose-500/50', 'text-rose-200');
+            }
+            
+            box.textContent = msg;
+            setTimeout(() => {
+                box.classList.add('hidden');
+            }, 3500);
         }
 
-        vipContainer.appendChild(card);
-      }
-    }
+        // 密碼驗證邏輯
+        function verifyPassword() {
+            const input = document.getElementById('passcode').value.trim();
+            if (!input) {
+                showMessage('請輸入完整的通行密碼', 'error');
+                return;
+            }
+            if (input === '8888' || input === 'niu888') {
+                showMessage('通行密碼正確！正在進入選房系統...', 'info');
+                setTimeout(() => {
+                    alert('【系統驗證成功】歡迎進入牛老大專屬選房終端系統！');
+                }, 800);
+            } else {
+                showMessage('通行密碼錯誤，請重新輸入或聯繫管理員', 'error');
+            }
+        }
 
-    function triggerOracle() {
-      playBeep(1000, 'sine', 0.15);
-      calculateStrategy();
-      const overlay = document.getElementById('scanningOverlay');
-      overlay.classList.remove('hidden');
+        // 試用體驗邏輯
+        function startTrial() {
+            showMessage('已成功啟動 10 分鐘免費試用體驗權限！', 'info');
+        }
 
-      setTimeout(() => {
-        overlay.classList.add('hidden');
-        refreshRooms();
-        playBeep(1200, 'triangle', 0.1);
-      }, 1000);
-    }
+        // Canvas 高質感深紅粒子與垂直數位光雨
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let rainDrops = [];
 
-    function refreshRooms() {
-      const randomRoom = '#' + String(Math.floor(Math.random() * 250) + 1).padStart(3, '0');
-      const randomRate = (97.5 + Math.random() * 2.3).toFixed(1);
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
-      document.getElementById('mainRoomNum').innerText = randomRoom + ' 號房';
-      document.getElementById('rateText1').innerText = randomRate + '%';
-      renderVipRooms();
-    }
+        // 飄浮紅光粒子
+        class Particle {
+            constructor() {
+                this.reset();
+            }
 
-    function openVipModal(roomCode = 'VIP', rate = '99.2%') { 
-      playBeep(600, 'sine', 0.08);
-      document.getElementById('modalRoomTag').innerText = roomCode;
-      document.getElementById('modalRateTag').innerText = rate;
-      document.getElementById('vipModal').classList.remove('hidden'); 
-    }
-    function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
-    function closeCardModal() { document.getElementById('cardModal').classList.add('hidden'); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedY = -(Math.random() * 0.7 + 0.2);
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.fadeSpeed = Math.random() * 0.006 + 0.002;
+                const redColors = ['#ff4d6d', '#ff1a4d', '#ff758f', '#ffffff'];
+                this.color = redColors[Math.floor(Math.random() * redColors.length)];
+            }
 
-    // 生成戰報 Canvas
-    function generateCardCanvas() {
-      playBeep(900, 'sine', 0.1);
-      const canvas = document.getElementById('reportCanvas');
-      const ctx = canvas.getContext('2d');
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.opacity -= this.fadeSpeed;
 
-      const capital = document.getElementById('capitalInput').value;
-      const bet = document.getElementById('resBet').innerText;
-      const roomNum = document.getElementById('mainRoomNum').innerText;
+                if (this.opacity <= 0 || this.y < 0) {
+                    this.reset();
+                    this.y = canvas.height + 10;
+                }
+            }
 
-      ctx.fillStyle = '#070204';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = Math.max(0, this.opacity);
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff4d6d';
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = 0;
+            }
+        }
 
-      ctx.strokeStyle = '#FF003C';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+        // 下落的光芒脈衝雨
+        class RainDrop {
+            constructor() {
+                this.reset();
+            }
 
-      ctx.fillStyle = '#FF003C';
-      ctx.font = 'black 26px Orbitron';
-      ctx.textAlign = 'center';
-      ctx.fillText('牛老大專屬', canvas.width / 2, 75);
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -Math.random() * canvas.height;
+                this.length = Math.random() * 40 + 15;
+                this.speed = Math.random() * 4 + 2;
+                this.opacity = Math.random() * 0.4 + 0.1;
+            }
 
-      ctx.fillStyle = '#FF2A7A';
-      ctx.font = '12px Noto Sans TC';
-      ctx.fillText('戰神賽特 · 數據儀表板認證戰報', canvas.width / 2, 100);
+            update() {
+                this.y += this.speed;
+                if (this.y > canvas.height) {
+                    this.reset();
+                }
+            }
 
-      ctx.fillStyle = '#120509';
-      ctx.fillRect(40, 135, canvas.width - 80, 185);
-      ctx.strokeStyle = 'rgba(255, 0, 60, 0.6)';
-      ctx.strokeRect(40, 135, canvas.width - 80, 185);
+            draw() {
+                const grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.length);
+                grad.addColorStop(0, 'rgba(255, 77, 109, 0)');
+                grad.addColorStop(1, `rgba(225, 29, 72, ${this.opacity})`);
 
-      ctx.fillStyle = '#A0A0B0';
-      ctx.font = '13px Noto Sans TC';
-      ctx.fillText('今日首選爆分房號', canvas.width / 2, 170);
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x, this.y + this.length);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
 
-      ctx.fillStyle = '#FF2A7A';
-      ctx.font = 'black 54px Orbitron';
-      ctx.fillText(roomNum, canvas.width / 2, 240);
+        function initParticles() {
+            particles = [];
+            rainDrops = [];
+            for (let i = 0; i < 70; i++) {
+                particles.push(new Particle());
+            }
+            for (let i = 0; i < 35; i++) {
+                rainDrops.push(new RainDrop());
+            }
+        }
 
-      ctx.fillStyle = '#10B981';
-      ctx.font = 'bold 14px Noto Sans TC';
-      ctx.fillText('● 爆分訊號：極強 (98.8%)', canvas.width / 2, 285);
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製背景紅暈光芒
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 50,
+                canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 1.4
+            );
+            gradient.addColorStop(0, 'rgba(159, 18, 57, 0.15)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#120509';
-      ctx.fillRect(40, 340, canvas.width - 80, 180);
+            // 繪製光雨與粒子
+            rainDrops.forEach(r => {
+                r.update();
+                r.draw();
+            });
 
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#A0A0B0';
-      ctx.font = '14px Noto Sans TC';
-      ctx.fillText('預算本金:', 65, 390);
-      ctx.fillText('建議平打:', 65, 435);
-      ctx.fillText('攻守陣型:', 65, 480);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
 
-      ctx.textAlign = 'right';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 16px Orbitron';
-      ctx.fillText(capital + ' PTS', canvas.width - 65, 390);
-      ctx.fillStyle = '#FF003C';
-      ctx.fillText(bet, canvas.width - 65, 435);
-      ctx.fillStyle = '#B026FF';
-      ctx.font = 'bold 16px Noto Sans TC';
-      ctx.fillText('試探進攻型', canvas.width - 65, 480);
+            requestAnimationFrame(animate);
+        }
 
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#FF2A7A';
-      ctx.font = 'bold 13px Noto Sans TC';
-      ctx.fillText('數據最佳化 · 策略精準精算', canvas.width / 2, 565);
-
-      ctx.fillStyle = '#120509';
-      ctx.fillRect(40, 620, canvas.width - 80, 260);
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 16px Noto Sans TC';
-      ctx.fillText('掃碼加 LINE 解鎖 10 間 VIP 隱藏爆分房號', canvas.width / 2, 660);
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(canvas.width / 2 - 60, 690, 120, 120);
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(canvas.width / 2 - 50, 700, 100, 100);
-      ctx.fillStyle = '#10B981';
-      ctx.font = 'bold 10px Orbitron';
-      ctx.fillText('LINE OFFICIAL', canvas.width / 2, 755);
-
-      ctx.fillStyle = '#A0A0B0';
-      ctx.font = '12px Noto Sans TC';
-      ctx.fillText('官方客服 LINE @SethVIP', canvas.width / 2, 850);
-
-      document.getElementById('cardModal').classList.remove('hidden');
-    }
-
-    function downloadCanvas() {
-      const canvas = document.getElementById('reportCanvas');
-      const link = document.createElement('a');
-      link.download = 'Bull-Boss-Strategy-CyberRed.png';
-      link.href = canvas.toDataURL();
-      link.click();
-    }
-  </script>
+        window.onload = function() {
+            initParticles();
+            animate();
+        };
+    </script>
 </body>
 </html>
