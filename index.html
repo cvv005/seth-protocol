@@ -1,639 +1,849 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>牛老大專屬 - 戰神賽特數據演算法選房終端系統</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-red: #ff1e42;
-            --secondary-red: #9e0b24;
-            --dark-red: #4a030d;
-            --bg-dark: #0a0103;
-            --text-bright: #ffffff;
-            --text-dim: #d19ca5;
-            --panel-bg: rgba(20, 5, 8, 0.75);
-            --neon-glow: 0 0 15px rgba(255, 30, 66, 0.6);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>牛老大專屬 · 戰神賽特數據演算法選房終端</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Orbitron & Noto Sans TC -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", Roboto, sans-serif;
-            user-select: none;
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            neon: {
+              red: '#FF003C',
+              pink: '#FF2A7A',
+              purple: '#B026FF',
+              dark: '#0A0306',
+              card: '#120509',
+              border: '#3D0C18'
+            }
+          },
+          fontFamily: {
+            mono: ['Orbitron', 'monospace'],
+            sans: ['Noto Sans TC', 'sans-serif'],
+          }
         }
+      }
+    }
+  </script>
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-bright);
-            min-height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+  <style>
+    body {
+      background-color: #070204;
+      color: #F8FAFC;
+      overflow-x: hidden;
+      font-family: 'Noto Sans TC', sans-serif;
+    }
 
-        /* 背景動態特效 Canvas */
-        #bgCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
+    .neon-solid-text {
+      color: #FF2A7A;
+      text-shadow: 0 0 12px rgba(255, 0, 60, 0.8), 0 0 20px rgba(255, 42, 122, 0.5);
+    }
 
-        /* 跑馬燈 */
-        .marquee-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(30, 0, 5, 0.85);
-            border-bottom: 1px solid rgba(255, 30, 66, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 15px;
-            font-size: 0.85rem;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
+    .cyber-card {
+      background: rgba(18, 5, 9, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 0, 60, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 0, 60, 0.1);
+      position: relative;
+    }
 
-        .marquee-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            overflow: hidden;
-            white-space: nowrap;
-            color: var(--text-dim);
-            flex: 1;
-            margin-right: 15px;
-        }
+    @keyframes borderGlow {
+      0%, 100% { border-color: rgba(255, 0, 60, 0.8); box-shadow: 0 0 20px rgba(255, 0, 60, 0.4), inset 0 0 10px rgba(255, 0, 60, 0.2); }
+      50% { border-color: rgba(176, 38, 255, 0.9); box-shadow: 0 0 35px rgba(176, 38, 255, 0.6), inset 0 0 15px rgba(176, 38, 255, 0.3); }
+    }
+    .animate-border-glow {
+      animation: borderGlow 3s infinite ease-in-out;
+    }
 
-        .marquee-tag {
-            background: var(--primary-red);
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+    @keyframes btnPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255, 0, 60, 0.6)); }
+      50% { transform: scale(1.02); filter: drop-shadow(0 0 25px rgba(255, 0, 60, 0.9)); }
+    }
+    .pulse-btn {
+      animation: btnPulse 2s infinite ease-in-out;
+    }
 
-        .marquee-text {
-            animation: marquee 25s linear infinite;
-        }
+    .glow-orb-1 {
+      position: fixed;
+      top: 10%; left: 15%;
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(255,0,60,0.25) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 8s infinite alternate ease-in-out;
+    }
 
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+    .glow-orb-2 {
+      position: fixed;
+      bottom: 10%; right: 10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(176,38,255,0.2) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 10s infinite alternate-reverse ease-in-out;
+    }
 
-        .top-status {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, -40px) scale(1.2); }
+    }
 
-        .audio-btn {
-            background: rgba(255, 30, 66, 0.15);
-            border: 1px solid rgba(255, 30, 66, 0.4);
-            color: var(--text-bright);
-            padding: 4px 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+    .hover-cyber {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .hover-cyber:hover {
+      transform: translateY(-3px) scale(1.01);
+      border-color: rgba(255, 0, 60, 1);
+      box-shadow: 0 8px 25px rgba(255, 0, 60, 0.3);
+    }
 
-        .audio-btn:hover {
-            background: var(--primary-red);
-            box-shadow: var(--neon-glow);
-        }
-
-        /* 驗證頁面 (登入卡片) */
-        .auth-container {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 440px;
-            background: var(--panel-bg);
-            border: 1px solid rgba(255, 30, 66, 0.4);
-            border-radius: 20px;
-            padding: 35px 25px;
-            box-shadow: 0 0 35px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 30, 66, 0.2);
-            backdrop-filter: blur(15px);
-            text-align: center;
-            transition: all 0.5s ease;
-        }
-
-        .brand-badge {
-            width: 70px;
-            height: 70px;
-            margin: 0 auto 15px;
-            background: linear-gradient(135deg, var(--secondary-red), #1a0004);
-            border: 2px solid var(--primary-red);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--neon-glow);
-            font-size: 2rem;
-            color: var(--primary-red);
-        }
-
-        .title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            background: linear-gradient(180deg, #ffffff, #ff7a8f);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            letter-spacing: 1px;
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .input-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .input-box-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-box {
-            width: 100%;
-            padding: 12px 10px0px 15px;
-            background: rgba(10, 0, 3, 0.7);
-            border: 1px solid rgba(255, 30, 66, 0.3);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .input-box:focus {
-            border-color: var(--primary-red);
-            box-shadow: 0 0 10px rgba(255, 30, 66, 0.4);
-        }
-
-        .submit-btn {
-            position: absolute;
-            right: 5px;
-            background: linear-gradient(135deg, #ff1e42, #a8001d);
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .submit-btn:hover {
-            transform: scale(1.03);
-            box-shadow: var(--neon-glow);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.2);
-            margin: 20px 0;
-            font-size: 0.75rem;
-        }
-
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: rgba(255, 30, 66, 0.2);
-        }
-
-        .divider span {
-            padding: 0 10px;
-        }
-
-        .trial-btn {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255, 30, 66, 0.1);
-            border: 1px solid rgba(255, 30, 66, 0.4);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .trial-btn:hover {
-            background: rgba(255, 30, 66, 0.25);
-            border-color: var(--primary-red);
-            box-shadow: var(--neon-glow);
-        }
-
-        .footer-tag {
-            margin-top: 25px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.3);
-            letter-spacing: 1px;
-        }
-
-        /* 系統選房主介面 (登入後) */
-        .main-dashboard {
-            display: none;
-            position: relative;
-            z-index: 10;
-            width: 92%;
-            max-width: 1000px;
-            margin-top: 60px;
-            margin-bottom: 30px;
-        }
-
-        .dashboard-header {
-            background: var(--panel-bg);
-            border: 1px solid rgba(255, 30, 66, 0.4);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            background: var(--secondary-red);
-            border: 1px solid var(--primary-red);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: #fff;
-        }
-
-        .timer-badge {
-            background: rgba(255, 30, 66, 0.2);
-            border: 1px solid var(--primary-red);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: #ff9ebb;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .room-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .room-card {
-            background: var(--panel-bg);
-            border: 1px solid rgba(255, 30, 66, 0.3);
-            border-radius: 16px;
-            padding: 18px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .room-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-red);
-            box-shadow: var(--neon-glow);
-        }
-
-        .room-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 30, 66, 0.2);
-            padding-bottom: 8px;
-        }
-
-        .room-id {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #fff;
-        }
-
-        .room-status {
-            font-size: 0.75rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        .status-hot {
-            background: rgba(255, 30, 66, 0.25);
-            color: #ff6b81;
-            border: 1px solid var(--primary-red);
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-            color: var(--text-dim);
-        }
-
-        .stat-val {
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .stat-val.highlight {
-            color: var(--primary-red);
-            font-size: 1rem;
-        }
-
-        .enter-room-btn {
-            width: 100%;
-            margin-top: 12px;
-            padding: 10px;
-            background: linear-gradient(135deg, var(--primary-red), var(--secondary-red));
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .enter-room-btn:hover {
-            opacity: 0.9;
-            box-shadow: 0 0 10px rgba(255, 30, 66, 0.5);
-        }
-    </style>
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(18, 5, 9, 0.5);
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 0, 60, 0.5);
+      border-radius: 8px;
+    }
+  </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-neon-red selection:text-white">
 
-    <canvas id="bgCanvas"></canvas>
+  <!-- 背景動畫 -->
+  <div class="glow-orb-1"></div>
+  <div class="glow-orb-2"></div>
+  <canvas id="cyberCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
-    <!-- 頂部即時跑馬燈 -->
-    <div class="marquee-bar">
-        <div class="marquee-tag"><i class="fa-solid fa-bolt"></i> 即時勝分戰報</div>
-        <div class="marquee-content">
-            <span class="marquee-text">
-                VIP-88** 剛剛於 #08 號房獲利 +$128,400 | 會員 VIP-92** 於 #03 號房爆出大獎 +$245,000 | 數據算法已更新：賽特爆率提升 +38%
-            </span>
+  <!-- ==================== 頁面 1: 入口驗證頁面 ==================== -->
+  <div id="gatekeeperPage" class="min-h-screen w-full flex items-center justify-center p-4 z-10 relative">
+    <div class="cyber-card max-w-md w-full rounded-3xl p-8 border-neon-red/60 animate-border-glow shadow-2xl relative overflow-hidden text-center">
+      
+      <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-neon-red via-red-600 to-neon-purple flex items-center justify-center text-white text-4xl shadow-xl shadow-neon-red/50 ring-4 ring-neon-pink animate-pulse mx-auto mb-5">
+        𓁦
+      </div>
+
+      <h1 class="text-2xl font-mono font-black tracking-widest neon-solid-text mb-1">牛老大專屬</h1>
+      <p class="text-xs text-pink-200/80 font-medium mb-6">戰神賽特 · 數據演算法選房終端系統</p>
+
+      <!-- 錯誤提示 -->
+      <div id="authErrorMsg" class="hidden mb-4 p-3 bg-red-950/80 border border-red-500/80 rounded-xl text-red-300 text-xs font-bold animate-bounce">
+        <i class="fa-solid fa-triangle-exclamation mr-1"></i> 通行密碼不正確，請重新輸入！
+      </div>
+
+      <!-- 輸入通行密碼 -->
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-300 mb-2">請輸入通行密碼</label>
+          <div class="relative">
+            <input type="password" id="passcodeKey" placeholder="請輸入解鎖密碼..." 
+              class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-white font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner text-sm">
+            <button onclick="verifyPasscode()" class="absolute right-2 top-2 bg-gradient-to-r from-neon-red to-neon-pink hover:brightness-125 text-white text-xs font-black px-4 py-2 rounded-lg transition shadow-md">
+              解鎖驗證
+            </button>
+          </div>
         </div>
-        <div class="top-status">
-            <span id="currentTime">[00:00:00]</span>
-            <button class="audio-btn" id="audioToggle"><i class="fa-solid fa-volume-high"></i> 音效 ON</button>
-        </div>
-    </div>
 
-    <!-- 登入與驗證介面 -->
-    <div class="auth-container" id="authBox">
-        <div class="brand-badge">
-            <i class="fa-solid fa-shield-halved"></i>
-        </div>
-        <div class="title">牛老大專屬</div>
-        <div class="subtitle">戰神賽特 · 數據演算法選房終端系統</div>
-
-        <div class="input-group">
-            <label class="input-label">請輸入通行密碼</label>
-            <div class="input-box-wrapper">
-                <input type="password" class="input-box" id="accessKey" placeholder="請輸入解鎖密碼...">
-                <button class="submit-btn" id="loginBtn">解鎖驗證</button>
-            </div>
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-white/10"></div>
+          <span class="flex-shrink mx-3 text-gray-500 text-[11px] font-mono">OR</span>
+          <div class="flex-grow border-t border-white/10"></div>
         </div>
 
-        <div class="divider"><span>OR</span></div>
-
-        <button class="trial-btn" id="trialBtn">
-            <i class="fa-solid fa-clock-rotate-left"></i> 免費試用體驗（限定 10 分鐘）
+        <!-- 免費試用按鈕 -->
+        <button id="trialBtn" onclick="startFreeTrial()" class="w-full bg-black/80 hover:bg-neon-purple/20 border border-neon-purple/60 hover:border-neon-purple text-purple-200 font-bold py-3.5 rounded-xl transition duration-300 flex items-center justify-center space-x-2 text-xs shadow-lg">
+          <i class="fa-solid fa-clock-rotate-left text-neon-purple text-sm animate-pulse"></i>
+          <span id="trialBtnText">免費試用體驗 (限定 10 分鐘)</span>
         </button>
+      </div>
 
-        <div class="footer-tag">SETH ENGINE V3.5 · DYNAMIC ENCRYPTED ACCESS</div>
+      <div class="mt-8 text-[10px] text-gray-500 font-mono border-t border-white/10 pt-4">
+        SETH ENGINE v3.5 · DYNAMIC ENCRYPTED ACCESS
+      </div>
+
     </div>
+  </div>
 
-    <!-- 選房控制台主介面 -->
-    <div class="main-dashboard" id="mainDashboard">
-        <div class="dashboard-header">
-            <div class="user-info">
-                <div class="user-avatar"><i class="fa-solid fa-crown"></i></div>
+
+  <!-- ==================== 頁面 2: 選房主終端頁面 ==================== -->
+  <div id="mainDashboardPage" class="hidden min-h-screen flex flex-col justify-between relative z-10">
+    
+    <header class="w-full border-b border-neon-red/40 cyber-card sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 py-3.5 flex justify-between items-center">
+        <div class="flex items-center space-x-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-neon-red via-red-600 to-neon-purple flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-neon-red/50 ring-2 ring-neon-pink animate-pulse">
+            𓁦
+          </div>
+          <div>
+            <h1 class="text-xl font-mono font-black tracking-widest neon-solid-text flex items-center gap-2">
+              牛老大專屬 <span id="userRoleBadge" class="bg-gradient-to-r from-neon-red to-neon-purple text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal shadow-md shadow-neon-red/40">VIP 完整解鎖</span>
+            </h1>
+            <p class="text-[11px] text-pink-200/80 font-medium">戰神賽特 · 數據演算法選房終端</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <div id="trialBadge" class="hidden bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1.5 rounded-full font-mono font-bold animate-pulse">
+            <i class="fa-solid fa-stopwatch mr-1"></i> 試用剩餘: <span id="trialTimer">10:00</span>
+          </div>
+          <a href="https://lin.ee/W2g5kgf" target="_blank" class="hidden sm:flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2 rounded-full shadow-lg transition duration-300 hover:scale-105 border border-emerald-300">
+            <i class="fa-brands fa-line text-lg"></i>
+            <span>LINE 官方客服</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-black/80 border-t border-neon-red/30 text-[11px] py-2 px-4 text-gray-300 flex justify-between overflow-x-auto whitespace-nowrap backdrop-blur-md">
+        <div class="flex space-x-8 mx-auto items-center font-mono">
+          <span><i class="fa-solid fa-bolt text-neon-red mr-1.5 animate-pulse"></i> API 延遲: <strong id="pingText" class="text-emerald-400">8ms</strong></span>
+          <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 防護等級: <strong class="text-cyan-400">動態加密全開</strong></span>
+          <span><i class="fa-solid fa-users text-neon-purple mr-1.5"></i> 在線人數: <strong id="onlineCount" class="text-purple-300">3,450 人</strong></span>
+          <span><i class="fa-solid fa-fire text-neon-pink mr-1.5"></i> 熱門爆分池: <strong class="text-neon-pink">#087, #142, #209</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow z-10">
+      
+      <!-- 左側：試算區 -->
+      <section class="lg:col-span-5 flex flex-col space-y-6">
+        <div class="cyber-card rounded-2xl p-6 border-neon-red/50 animate-border-glow overflow-hidden">
+          <h2 class="text-base font-bold text-white flex items-center justify-between mb-5 border-b border-neon-red/30 pb-3">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-calculator text-neon-red text-lg"></i> 本金戰術與風控試算</span>
+            <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/40 font-mono font-bold shadow-sm shadow-neon-red/30">AI ENGINE</span>
+          </h2>
+
+          <div class="mb-5">
+            <label class="block text-xs text-gray-300 mb-2 font-medium">請輸入您的預算本金 (分/元)</label>
+            <div class="relative">
+              <input type="number" id="capitalInput" value="5000" placeholder="例如: 5000" 
+                class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-2xl font-black text-neon-pink font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner">
+              <span class="absolute right-4 top-4 text-xs text-neon-pink/70 font-bold font-mono">PTS</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2 mt-3 font-mono">
+              <button onclick="setCapital(1000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">1,000</button>
+              <button onclick="setCapital(5000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">5,000</button>
+              <button onclick="setCapital(10000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">10,000</button>
+              <button onclick="setCapital(30000)" class="bg-black/60 hover:bg-neon-red/30 hover:border-neon-red border border-white/10 text-gray-200 text-xs py-2 rounded-lg transition font-bold">30,000</button>
+            </div>
+          </div>
+
+          <div class="bg-black/70 border border-neon-red/30 rounded-xl p-4.5 space-y-4 shadow-lg">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-coins text-neon-pink"></i> 推薦平打單注</span>
+              <span id="resBet" class="font-black text-neon-pink text-xl font-mono drop-shadow">24 分</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-400"></i> 預計防禦轉數</span>
+              <span id="resSpins" class="font-bold text-emerald-400 text-base font-mono">208 轉</span>
+            </div>
+            <div class="flex justify-between items-center text-sm pt-2 border-t border-white/10">
+              <span class="text-gray-300 flex items-center gap-2"><i class="fa-solid fa-sliders text-neon-purple"></i> 建議進攻打法</span>
+              <span id="resStrategy" class="bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1 rounded-full font-bold shadow-sm shadow-purple-500/30">進退有度 · 買 Buy 試探</span>
+            </div>
+          </div>
+
+          <button onclick="triggerOracle()" class="w-full mt-6 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black py-4 rounded-xl shadow-xl shadow-neon-red/40 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95 border border-pink-300 pulse-btn">
+            <i class="fa-solid fa-calculator text-lg"></i>
+            <span>計算最適打法</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 右側：房號區 -->
+      <section class="lg:col-span-7 flex flex-col space-y-6">
+        <div class="cyber-card rounded-2xl p-6 flex-grow flex flex-col justify-between overflow-hidden">
+          
+          <div id="scanningOverlay" class="absolute inset-0 bg-black/95 backdrop-blur-md z-30 flex flex-col items-center justify-center hidden">
+            <div class="relative w-24 h-24 flex items-center justify-center mb-4">
+              <div class="absolute inset-0 rounded-full border-4 border-neon-red/20 border-t-neon-red animate-spin"></div>
+              <div class="absolute inset-2 rounded-full border-2 border-cyan-400/20 border-b-cyan-400 animate-spin" style="animation-direction: reverse;"></div>
+              <span class="text-4xl animate-pulse text-neon-pink">𓁦</span>
+            </div>
+            <div class="text-neon-pink font-mono font-bold text-lg tracking-widest animate-pulse">OPTIMIZING STRATEGY...</div>
+            <p class="text-xs text-gray-400 mt-2 font-mono">RE-CALCULATING 10 VIP ROOMS &amp; SEED POOLS...</p>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-4 border-b border-neon-red/30 pb-3">
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-door-open text-neon-red text-lg"></i> 系統推薦勝率房號 (主推 + 10間 VIP)
+              </h2>
+              <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-xs text-emerald-400 font-mono font-bold">LIVE MONITORING</span>
+              </div>
+            </div>
+
+            <!-- 首選主推房 -->
+            <div class="mb-5 bg-black/80 border border-neon-red/80 rounded-2xl p-4.5 hover-cyber group relative overflow-hidden shadow-lg">
+              <div class="flex justify-between items-start">
                 <div>
-                    <h3 style="color:#fff; font-size:1.1rem;">牛老大 VIP 專屬頻道</h3>
-                    <p style="color:var(--text-dim); font-size:0.8rem;">賽特演算法實時演算中</p>
+                  <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/50 font-bold shadow-sm shadow-neon-red/30">首選勝率帝王房</span>
+                  <div id="mainRoomNum" class="text-3xl font-black text-white mt-2 font-mono tracking-tight group-hover:text-neon-pink transition drop-shadow">#087 號房</div>
                 </div>
+                <div class="text-right">
+                  <div class="text-xs text-gray-400 font-medium">爆分預測指數</div>
+                  <div id="rateText1" class="text-2xl font-black text-emerald-400 font-mono mt-1 drop-shadow">98.8%</div>
+                </div>
+              </div>
+              
+              <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
+                <span class="text-gray-300 flex items-center gap-1"><i class="fa-solid fa-fire text-neon-pink animate-pulse"></i> 高倍數乘數訊號極強</span>
+                <a href="https://cvv005.mw168.online" target="_blank" class="bg-neon-red/20 hover:bg-neon-red text-neon-pink hover:text-white border border-neon-red/60 font-bold px-3.5 py-1.5 rounded-lg transition shadow-md">前往機台 ➔</a>
+              </div>
             </div>
-            <div class="timer-badge">
-                <i class="fa-solid fa-hourglass-half"></i>
-                <span id="trialTimer">體驗倒數：10:00</span>
+
+            <!-- VIP 10 間 -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-crown text-neon-purple"></i> VIP 獨家爆分房池 (共 10 間)
+              </span>
+              <span class="text-[10px] text-gray-400">上下滑動查看更多 🠇</span>
             </div>
+
+            <div id="vipRoomContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-neon-red/30">
+            <button onclick="generateCardCanvas()" class="w-full bg-gradient-to-r from-black via-zinc-900 to-black hover:from-zinc-900 hover:to-zinc-900 text-neon-pink border border-neon-pink/60 py-3.5 rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-neon-red/30">
+              <i class="fa-solid fa-image text-neon-pink text-lg animate-pulse"></i>
+              <span>一鍵生成『戰神幸運戰報卡』圖片</span>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="mt-10 py-4 border-t border-neon-red/30 text-center text-xs text-gray-500 z-10 font-mono">
+      <p>© 2026 牛老大專屬 PROTOCOL · 僅供娛樂數據分析參考，請理性娛樂。</p>
+    </footer>
+  </div>
+
+
+  <!-- ==================== Modal 1: 管理員控制台 (輸入 aimincvv168 開啟) ==================== -->
+  <div id="adminModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="cyber-card max-w-md w-full rounded-2xl p-6 relative border-neon-red/80 shadow-2xl">
+      <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-neon-red/40">
+        <div class="w-10 h-10 rounded-xl bg-neon-red/20 border border-neon-red flex items-center justify-center text-neon-pink text-xl">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-white">管理員發行控制台</h3>
+          <p class="text-[11px] text-gray-400 font-mono">ADMIN: aimincvv168</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-300 mb-2">新增發行通行密碼</label>
+          <div class="flex space-x-2">
+            <input type="text" id="newPasscodeKey" placeholder="例如: VIP999" 
+              class="flex-1 bg-black/80 border border-neon-purple/60 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-neon-pink">
+            <button onclick="addNewPasscode()" class="bg-gradient-to-r from-neon-purple to-neon-pink hover:brightness-125 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md">
+              發行密碼
+            </button>
+          </div>
         </div>
 
-        <div class="room-grid" id="roomGrid">
-            <!-- 房間卡片由 JS 自動動態渲染 -->
+        <div>
+          <label class="block text-xs font-bold text-gray-300 mb-2">已發行密碼清單</label>
+          <div id="issuedPasscodesList" class="bg-black/60 border border-white/10 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2 font-mono text-xs">
+          </div>
         </div>
+
+        <button onclick="closeAdminModal(); enterDashboard(true);" class="w-full bg-neon-red hover:bg-red-600 text-white font-bold py-3 rounded-xl transition text-xs shadow-lg mt-2">
+          進入主選房系統 (管理者權限) ➔
+        </button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // 即時時間更新
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toTimeString().split(' ')[0];
-            document.getElementById('currentTime').innerText = `[${timeStr}]`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
 
-        // Canvas 動態粒子背景
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
+  <!-- ==================== Modal 2: 免費試用專用 - LINE 官方領取通行碼 ==================== -->
+  <div id="vipModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="cyber-card max-w-sm w-full rounded-2xl p-6 text-center relative border-emerald-500/80">
+      <button onclick="closeVipModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
 
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
+      <div class="w-16 h-16 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-400 text-3xl shadow-lg shadow-emerald-500/40 animate-pulse">
+        <i class="fa-brands fa-line"></i>
+      </div>
 
-        const particles = [];
-        for (let i = 0; i < 65; i++) {
-            particles.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                speedY: Math.random() * 2 + 0.5,
-                length: Math.random() * 40 + 10,
-                opacity: Math.random() * 0.7 + 0.2
-            });
-        }
+      <h3 class="text-xl font-black text-white mb-2">解鎖 VIP 獨家爆分房號</h3>
+      <p class="text-xs text-gray-300 leading-relaxed mb-6">
+        您當前為 <strong class="text-neon-purple">免費試用體驗模式</strong>。<br>
+        監控顯示 <strong id="modalRoomTag" class="text-neon-pink">VIP 房號</strong> 的咬度回饋率高達 <strong id="modalRateTag" class="text-emerald-400">99.2%</strong>！<br><br>
+        請加入 <strong class="text-emerald-400">LINE 官方帳號</strong> 即可免費領取永久通行密碼解鎖完整內容！
+      </p>
 
-        function drawParticles() {
-            ctx.clearRect(0, 0, width, height);
-            
-            // 背景漸層
-            const gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, '#120004');
-            gradient.addColorStop(0.5, '#050001');
-            gradient.addColorStop(1, '#000000');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, width, height);
+      <a href="https://lin.ee/W2g5kgf" target="_blank" class="w-full block bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl shadow-lg shadow-emerald-600/40 transition duration-300 mb-3 border border-emerald-300 flex items-center justify-center space-x-2">
+        <i class="fa-brands fa-line text-xl"></i>
+        <span>加入 LINE 官方領取通行密碼</span>
+      </a>
 
-            // 繪製紅光流星粒子
-            particles.forEach(p => {
-                ctx.beginPath();
-                const pGrad = ctx.createLinearGradient(p.x, p.y, p.x, p.y - p.length);
-                pGrad.addColorStop(0, `rgba(255, 30, 66, ${p.opacity})`);
-                pGrad.addColorStop(1, 'rgba(255, 30, 66, 0)');
-                ctx.strokeStyle = pGrad;
-                ctx.lineWidth = 2;
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x, p.y - p.length);
-                ctx.stroke();
+      <button onclick="closeVipModal()" class="text-xs text-gray-500 hover:underline">返回試用頁面</button>
+    </div>
+  </div>
 
-                p.y += p.speedY;
-                if (p.y - p.length > height) {
-                    p.y = 0;
-                    p.x = Math.random() * width;
-                }
-            });
 
-            requestAnimationFrame(drawParticles);
-        }
-        drawParticles();
+  <!-- ==================== Modal 3: 戰報卡 ==================== -->
+  <div id="cardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+    <div class="max-w-md w-full flex flex-col items-center my-auto">
+      <div class="rounded-xl overflow-hidden cyber-card border-neon-red shadow-2xl mb-4">
+        <canvas id="reportCanvas" width="540" height="960" class="w-[270px] h-[480px] sm:w-[320px] sm:h-[568px]"></canvas>
+      </div>
 
-        // 登入與進入選房邏輯
-        const authBox = document.getElementById('authBox');
-        const mainDashboard = document.getElementById('mainDashboard');
-        const loginBtn = document.getElementById('loginBtn');
+      <div class="flex space-x-3 w-full max-w-xs">
+        <button onclick="downloadCanvas()" class="flex-1 bg-neon-red hover:bg-red-600 text-white font-black py-3 rounded-xl text-sm transition shadow-lg shadow-neon-red/40">
+          <i class="fa-solid fa-download mr-1"></i> 下載高清圖片
+        </button>
+        <button onclick="closeCardModal()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold px-5 py-3 rounded-xl text-sm transition">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JS 邏輯核心 -->
+  <script>
+    // 預設密碼庫
+    let validPasscodes = ["SETH888", "VIP888", "SETH999"];
+    const adminAccount = "aimincvv168";
+    let isFullUnlocked = false; // 是否已完全解鎖權限
+
+    const allowedBets = [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 30, 32, 36, 
+      40, 42, 48, 54, 56, 60, 64, 72, 80, 96, 100, 112, 120, 128, 140, 144, 
+      160, 180, 200, 240, 280, 300, 320, 360, 400, 420, 480, 500, 540, 560, 
+      600, 640, 700, 720, 800, 840, 900, 960, 980, 1000, 1080, 1120, 1200, 
+      1280, 1400, 1440, 1600, 1800, 2000
+    ];
+
+    // 初始化檢查：今日是否已經試用過
+    window.addEventListener('DOMContentLoaded', () => {
+      checkTrialStatus();
+    });
+
+    function checkTrialStatus() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const usedDate = localStorage.getItem('seth_trial_used_date');
+
+      if (usedDate === todayStr) {
         const trialBtn = document.getElementById('trialBtn');
-        const trialTimer = document.getElementById('trialTimer');
-        let timerInterval = null;
+        const trialText = document.getElementById('trialBtnText');
+        trialBtn.disabled = true;
+        trialBtn.classList.remove('hover:bg-neon-purple/20', 'hover:border-neon-purple', 'text-purple-200');
+        trialBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-900', 'border-gray-700', 'text-gray-500');
+        trialText.innerText = '今日試用額度已使用 (請輸入密碼登入)';
+      }
+    }
 
-        function enterDashboard(isTrial = true) {
-            authBox.style.display = 'none';
-            mainDashboard.style.display = 'block';
-            renderRooms();
+    // 1. 驗證密碼邏輯
+    function verifyPasscode() {
+      const input = document.getElementById('passcodeKey').value.trim();
+      const errBox = document.getElementById('authErrorMsg');
 
-            if (isTrial) {
-                startTrialTimer(10 * 60); // 10 分鐘倒數
-            } else {
-                trialTimer.innerText = "VIP 尊榮版：永久授權";
-            }
+      if (input === adminAccount) {
+        errBox.classList.add('hidden');
+        openAdminModal();
+        return;
+      }
+
+      if (validPasscodes.includes(input)) {
+        errBox.classList.add('hidden');
+        enterDashboard(true); // 完整解鎖
+      } else {
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    // 2. 免費試用邏輯 (10分鐘倒數 & 當日限制)
+    function startFreeTrial() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const usedDate = localStorage.getItem('seth_trial_used_date');
+
+      if (usedDate === todayStr) {
+        alert('您今日的 10 分鐘免費試用已使用完畢！請輸入通行密碼繼續使用。');
+        return;
+      }
+
+      document.getElementById('trialBadge').classList.remove('hidden');
+      enterDashboard(false); // 免費試用模式 (VIP鎖定)
+
+      let timeLeft = 600; // 10分鐘 = 600秒
+      const timerElem = document.getElementById('trialTimer');
+
+      const interval = setInterval(() => {
+        timeLeft--;
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        timerElem.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          // 紀錄今日已試用
+          localStorage.setItem('seth_trial_used_date', todayStr);
+          alert('您的 10 分鐘免費試用已結束！系統已自動剔除。請輸入通行密碼領取完整體驗權限。');
+          location.reload();
+        }
+      }, 1000);
+    }
+
+    // 進入主儀表板 (fullUnlocked = true 表示完整解鎖, false 表示免費試用)
+    function enterDashboard(fullUnlocked = false) {
+      isFullUnlocked = fullUnlocked;
+      
+      const roleBadge = document.getElementById('userRoleBadge');
+      if (isFullUnlocked) {
+        roleBadge.innerText = 'VIP 完整權限解鎖';
+        roleBadge.className = 'bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal shadow-md shadow-emerald-600/40';
+      } else {
+        roleBadge.innerText = '免費體驗模式';
+        roleBadge.className = 'bg-neon-purple/50 text-purple-200 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal border border-neon-purple/60';
+      }
+
+      document.getElementById('gatekeeperPage').classList.add('hidden');
+      document.getElementById('mainDashboardPage').classList.remove('hidden');
+      calculateStrategy();
+      renderVipRooms();
+    }
+
+    // 3. 管理員 Modal 邏輯
+    function openAdminModal() {
+      renderIssuedPasscodes();
+      document.getElementById('adminModal').classList.remove('hidden');
+    }
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.add('hidden');
+    }
+
+    function addNewPasscode() {
+      const newKey = document.getElementById('newPasscodeKey').value.trim();
+      if (newKey && !validPasscodes.includes(newKey)) {
+        validPasscodes.push(newKey);
+        document.getElementById('newPasscodeKey').value = '';
+        renderIssuedPasscodes();
+        alert(`成功發行密碼: ${newKey}`);
+      }
+    }
+
+    function renderIssuedPasscodes() {
+      const list = document.getElementById('issuedPasscodesList');
+      list.innerHTML = '';
+      validPasscodes.forEach((code, idx) => {
+        const item = document.createElement('div');
+        item.className = 'flex justify-between items-center bg-white/5 p-2 rounded-lg border border-white/5';
+        item.innerHTML = `
+          <span class="text-neon-pink font-bold">${code}</span>
+          <span class="text-[10px] text-gray-400">有效密碼 #${idx + 1}</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    // 4. 背景動態粒子
+    const canvas = document.getElementById('cyberCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    for (let i = 0; i < 60; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2.5 + 0.8,
+        speedY: -Math.random() * 0.8 - 0.2,
+        opacity: Math.random() * 0.7 + 0.3,
+        color: Math.random() > 0.4 ? '#FF003C' : '#FF2A7A',
+        symbol: ['𓁦', '𓃭', '𓋹', '𓍝'][Math.floor(Math.random() * 4)]
+      });
+    }
+
+    function animateBg() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.y += p.speedY;
+        if (p.y < 0) p.y = canvas.height;
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.opacity;
+        ctx.font = `${p.size * 7}px Orbitron`;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = p.color;
+        ctx.fillText(p.symbol, p.x, p.y);
+      });
+      requestAnimationFrame(animateBg);
+    }
+    animateBg();
+
+    setInterval(() => {
+      document.getElementById('pingText').innerText = (7 + Math.floor(Math.random() * 5)) + 'ms';
+      document.getElementById('onlineCount').innerText = (3400 + Math.floor(Math.random() * 90)).toLocaleString() + ' 人';
+    }, 2500);
+
+    // 5. 試算邏輯
+    function setCapital(val) {
+      document.getElementById('capitalInput').value = val;
+      calculateStrategy();
+    }
+
+    function calculateStrategy() {
+      const capital = parseFloat(document.getElementById('capitalInput').value) || 0;
+      if (capital <= 0) return;
+
+      let target = capital / 200;
+      let bet = allowedBets[0];
+
+      for (let i = allowedBets.length - 1; i >= 0; i--) {
+        if (allowedBets[i] <= target) {
+          bet = allowedBets[i];
+          break;
+        }
+      }
+
+      let spins = Math.floor(capital / bet);
+
+      let strategyText = "平穩防守 · 慢磨訊號";
+      let strategyColor = "bg-blue-900/40 border-blue-500/60 text-blue-300";
+
+      if (capital >= 5000 && capital < 20000) {
+        strategyText = "進退有度 · 買 Buy 試探";
+        strategyColor = "bg-purple-900/40 border-purple-500/60 text-purple-200";
+      } else if (capital >= 20000) {
+        strategyText = "高倍攻勢 · 積極打法";
+        strategyColor = "bg-red-900/40 border-red-500/60 text-red-300";
+      }
+
+      document.getElementById('resBet').innerText = bet + " 分";
+      document.getElementById('resSpins').innerText = spins + " 轉";
+      
+      const stratElem = document.getElementById('resStrategy');
+      stratElem.innerText = strategyText;
+      stratElem.className = `text-xs px-3 py-1 rounded-full font-bold border ${strategyColor}`;
+    }
+
+    // 6. VIP 房號渲染 (根據 isFullUnlocked 決定顯示或是遮蔽)
+    const vipTags = [
+      "累積咬度爆滿", "連開大獎池", "高額倍率訊號", "大戶特選卡池", "黃金週期熱卡",
+      "高吐分回饋", "長線穩健池", "進入爆發期", "買 Buy 高回報", "即時飆升房"
+    ];
+
+    function renderVipRooms() {
+      const vipContainer = document.getElementById('vipRoomContainer');
+      vipContainer.innerHTML = '';
+
+      for (let i = 1; i <= 10; i++) {
+        const rate = (97.0 + Math.random() * 2.8).toFixed(1);
+        const tag = vipTags[i - 1];
+
+        // 產生真實隨機房號
+        const realRoomNumber = '#' + String((i * 19 + 7) % 240 + 1).padStart(3, '0') + ' 號房';
+
+        const card = document.createElement('div');
+        card.className = 'bg-black/80 border border-neon-purple/40 rounded-xl p-3.5 hover-cyber relative overflow-hidden shadow-md flex flex-col justify-between';
+        
+        if (isFullUnlocked) {
+          // 完整解鎖模式：直接呈現清晰房號
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/40 font-bold">
+                  VIP ${i} · ${tag}
+                </span>
+                <div class="text-2xl font-black text-white mt-2 font-mono tracking-tight text-neon-pink">${realRoomNumber}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-[10px] text-gray-400">回饋率</div>
+                <div class="text-lg font-black text-emerald-400 font-mono mt-0.5">${rate}%</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-[11px]">
+              <span class="text-emerald-400 font-mono text-[10px]">● 已解鎖訊號源</span>
+              <a href="https://cvv005.mw168.online" target="_blank" class="bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white px-3 py-1 rounded-lg border border-emerald-500/50 font-bold transition">
+                前往機台 ➔
+              </a>
+            </div>
+          `;
+        } else {
+          // 免費試用模式：遮蔽 VIP 房號，並跳出 LINE 領取提示
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-[9px] bg-neon-purple/20 text-purple-300 px-2 py-0.5 rounded-full border border-neon-purple/40 font-bold">
+                  VIP ${i} · ${tag}
+                </span>
+                <div class="text-2xl font-black text-gray-500 mt-2 font-mono blur-sm select-none">#??? 號房</div>
+              </div>
+              <div class="text-right">
+                <div class="text-[10px] text-gray-400">回饋率</div>
+                <div class="text-lg font-black text-neon-purple font-mono mt-0.5">${rate}%</div>
+              </div>
+            </div>
+            <div class="mt-3 pt-2 border-t border-white/10 flex justify-between items-center text-[11px]">
+              <span class="text-gray-400 font-mono text-[10px]">內部編號 #???</span>
+              <button onclick="openVipModal('VIP ${i}', '${rate}%')" class="bg-neon-purple/30 hover:bg-neon-purple text-purple-200 hover:text-white px-2.5 py-1 rounded-lg border border-neon-purple/50 font-bold transition">
+                解鎖房號
+              </button>
+            </div>
+          `;
         }
 
-        loginBtn.addEventListener('click', () => {
-            const key = document.getElementById('accessKey').value;
-            if (key.trim() !== '') {
-                enterDashboard(false);
-            } else {
-                alert('請輸入有效的通行密碼！');
-            }
-        });
+        vipContainer.appendChild(card);
+      }
+    }
 
-        trialBtn.addEventListener('click', () => {
-            enterDashboard(true);
-        });
+    function triggerOracle() {
+      calculateStrategy();
+      const overlay = document.getElementById('scanningOverlay');
+      overlay.classList.remove('hidden');
 
-        // 試用倒數計時器
-        function startTrialTimer(duration) {
-            let timer = duration;
-            if (timerInterval) clearInterval(timerInterval);
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        refreshRooms();
+      }, 1000);
+    }
 
-            timerInterval = setInterval(() => {
-                const minutes = Math.floor(timer / 60);
-                const seconds = timer % 60;
-                trialTimer.innerText = `體驗倒數：${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    function refreshRooms() {
+      const randomRoom = '#' + String(Math.floor(Math.random() * 250) + 1).padStart(3, '0');
+      const randomRate = (97.5 + Math.random() * 2.3).toFixed(1);
 
-                if (--timer < 0) {
-                    clearInterval(timerInterval);
-                    alert('10分鐘免費體驗時間已結束，請輸入正式密碼繼續使用！');
-                    mainDashboard.style.display = 'none';
-                    authBox.style.display = 'block';
-                }
-            }, 1000);
-        }
+      document.getElementById('mainRoomNum').innerText = randomRoom + ' 號房';
+      document.getElementById('rateText1').innerText = randomRate + '%';
+      renderVipRooms();
+    }
 
-        // 動態生成房間數據
-        function renderRooms() {
-            const roomGrid = document.getElementById('roomGrid');
-            roomGrid.innerHTML = '';
+    function openVipModal(roomCode = 'VIP', rate = '99.2%') { 
+      document.getElementById('modalRoomTag').innerText = roomCode;
+      document.getElementById('modalRateTag').innerText = rate;
+      document.getElementById('vipModal').classList.remove('hidden'); 
+    }
+    function closeVipModal() { document.getElementById('vipModal').classList.add('hidden'); }
+    function closeCardModal() { document.getElementById('cardModal').classList.add('hidden'); }
 
-            for (let i = 1; i <= 6; i++) {
-                const roomId = i < 10 ? `0${i}` : i;
-                const winRate = (Math.random() * 20 + 78).toFixed(1);
-                const rtp = (Math.random() * 40 + 110).toFixed(0);
+    // 7. 生成戰報 Canvas
+    function generateCardCanvas() {
+      const canvas = document.getElementById('reportCanvas');
+      const ctx = canvas.getContext('2d');
 
-                const cardHtml = `
-                    <div class="room-card">
-                        <div class="room-header">
-                            <span class="room-id">賽特 #${roomId} 號房</span>
-                            <span class="room-status status-hot">爆率極高</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>當前勝率演算：</span>
-                            <span class="stat-val highlight">${winRate}%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>預估 RTP 爆率：</span>
-                            <span class="stat-val">${rtp}%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>建議押注級距：</span>
-                            <span class="stat-val">適中 / 高</span>
-                        </div>
-                        <button class="enter-room-btn" onclick="alert('已載入 #${roomId} 號房演算法數據分析模組！')">進入分析房間</button>
-                    </div>
-                `;
-                roomGrid.innerHTML += cardHtml;
-            }
-        }
-    </script>
+      const capital = document.getElementById('capitalInput').value;
+      const bet = document.getElementById('resBet').innerText;
+      const roomNum = document.getElementById('mainRoomNum').innerText;
+
+      ctx.fillStyle = '#070204';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = '#FF003C';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+
+      ctx.fillStyle = '#FF003C';
+      ctx.font = 'black 26px Orbitron';
+      ctx.textAlign = 'center';
+      ctx.fillText('牛老大專屬', canvas.width / 2, 75);
+
+      ctx.fillStyle = '#FF2A7A';
+      ctx.font = '12px Noto Sans TC';
+      ctx.fillText('戰神賽特 · 數據儀表板認證戰報', canvas.width / 2, 100);
+
+      ctx.fillStyle = '#120509';
+      ctx.fillRect(40, 135, canvas.width - 80, 185);
+      ctx.strokeStyle = 'rgba(255, 0, 60, 0.6)';
+      ctx.strokeRect(40, 135, canvas.width - 80, 185);
+
+      ctx.fillStyle = '#A0A0B0';
+      ctx.font = '13px Noto Sans TC';
+      ctx.fillText('今日首選爆分房號', canvas.width / 2, 170);
+
+      ctx.fillStyle = '#FF2A7A';
+      ctx.font = 'black 54px Orbitron';
+      ctx.fillText(roomNum, canvas.width / 2, 240);
+
+      ctx.fillStyle = '#10B981';
+      ctx.font = 'bold 14px Noto Sans TC';
+      ctx.fillText('● 爆分訊號：極強 (98.8%)', canvas.width / 2, 285);
+
+      ctx.fillStyle = '#120509';
+      ctx.fillRect(40, 340, canvas.width - 80, 180);
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#A0A0B0';
+      ctx.font = '14px Noto Sans TC';
+      ctx.fillText('預算本金:', 65, 390);
+      ctx.fillText('建議平打:', 65, 435);
+      ctx.fillText('攻守陣型:', 65, 480);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 16px Orbitron';
+      ctx.fillText(capital + ' PTS', canvas.width - 65, 390);
+      ctx.fillStyle = '#FF003C';
+      ctx.fillText(bet, canvas.width - 65, 435);
+      ctx.fillStyle = '#B026FF';
+      ctx.font = 'bold 16px Noto Sans TC';
+      ctx.fillText('試探進攻型', canvas.width - 65, 480);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FF2A7A';
+      ctx.font = 'bold 13px Noto Sans TC';
+      ctx.fillText('數據最佳化 · 策略精準精算', canvas.width / 2, 565);
+
+      ctx.fillStyle = '#120509';
+      ctx.fillRect(40, 620, canvas.width - 80, 260);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 16px Noto Sans TC';
+      ctx.fillText('掃碼加 LINE 解鎖 10 間 VIP 隱藏爆分房號', canvas.width / 2, 660);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(canvas.width / 2 - 60, 690, 120, 120);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(canvas.width / 2 - 50, 700, 100, 100);
+      ctx.fillStyle = '#10B981';
+      ctx.font = 'bold 10px Orbitron';
+      ctx.fillText('LINE OFFICIAL', canvas.width / 2, 755);
+
+      ctx.fillStyle = '#A0A0B0';
+      ctx.font = '12px Noto Sans TC';
+      ctx.fillText('官方客服 LINE @SethVIP', canvas.width / 2, 850);
+
+      document.getElementById('cardModal').classList.remove('hidden');
+    }
+
+    function downloadCanvas() {
+      const canvas = document.getElementById('reportCanvas');
+      const link = document.createElement('a');
+      link.download = 'Bull-Boss-Strategy-CyberRed.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
 </body>
 </html>
