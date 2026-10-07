@@ -177,7 +177,6 @@
     </div>
   </div>
 
-
   <!-- ==================== 頁面 2: 選房主終端頁面 ==================== -->
   <div id="mainDashboardPage" class="hidden min-h-screen flex flex-col justify-between relative z-10">
     
@@ -211,7 +210,7 @@
           <span><i class="fa-solid fa-bolt text-neon-red mr-1.5 animate-pulse"></i> API 延遲: <strong id="pingText" class="text-emerald-400">8ms</strong></span>
           <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 防護等級: <strong class="text-cyan-400">動態加密全開</strong></span>
           <span><i class="fa-solid fa-users text-neon-purple mr-1.5"></i> 在線人數: <strong id="onlineCount" class="text-purple-300">3,450 人</strong></span>
-          <span><i class="fa-solid fa-rotate text-neon-pink mr-1.5 animate-spin"></i> 下次數據更新: <strong id="refreshCountdown" class="text-neon-pink font-bold">30s</strong></span>
+          <span><i class="fa-solid fa-rotate text-neon-pink mr-1.5 animate-spin"></i> 下次數據更新: <strong id="refreshCountdown" class="text-neon-pink font-bold">05:00</strong></span>
         </div>
       </div>
     </header>
@@ -256,9 +255,10 @@
             </div>
           </div>
 
-          <button onclick="triggerOracle()" class="w-full mt-6 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black py-4 rounded-xl shadow-xl shadow-neon-red/40 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95 border border-pink-300 pulse-btn">
+          <!-- 按鈕 1: 計算最適打法 -->
+          <button id="calcStrategyBtn" onclick="triggerAction()" class="w-full mt-6 bg-gradient-to-r from-neon-red via-neon-pink to-neon-purple hover:brightness-125 text-white font-black py-4 rounded-xl shadow-xl shadow-neon-red/40 transition duration-300 flex items-center justify-center space-x-2 text-base active:scale-95 border border-pink-300 pulse-btn">
             <i class="fa-solid fa-calculator text-lg"></i>
-            <span>計算最適打法</span>
+            <span id="calcBtnText">計算最適打法</span>
           </button>
         </div>
       </section>
@@ -283,8 +283,9 @@
                 <i class="fa-solid fa-door-open text-neon-red text-lg"></i> 系統推薦勝率房號 (主推 + 10間 VIP)
               </h2>
               <div class="flex items-center space-x-3">
-                <button onclick="triggerOracle()" class="text-xs bg-neon-purple/20 hover:bg-neon-purple/40 text-purple-300 border border-neon-purple/50 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-mono">
-                  <i class="fa-solid fa-arrows-rotate"></i> 手動刷新
+                <!-- 按鈕 2: 手動刷新 -->
+                <button id="manualRefreshBtn" onclick="triggerAction()" class="text-xs bg-neon-purple/20 hover:bg-neon-purple/40 text-purple-300 border border-neon-purple/50 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-mono">
+                  <i class="fa-solid fa-arrows-rotate"></i> <span id="refreshBtnText">手動刷新</span>
                 </button>
                 <div class="flex items-center space-x-1.5">
                   <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
@@ -341,7 +342,6 @@
     </footer>
   </div>
 
-
   <!-- ==================== Modal 1: 管理員控制台 (輸入 aimincvv168 開啟) ==================== -->
   <div id="adminModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
     <div class="cyber-card max-w-lg w-full rounded-2xl p-6 relative border-neon-red/80 shadow-2xl">
@@ -392,7 +392,6 @@
     </div>
   </div>
 
-
   <!-- ==================== Modal 2: 免費試用專用 - LINE 官方領取通行碼 ==================== -->
   <div id="vipModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
     <div class="cyber-card max-w-sm w-full rounded-2xl p-6 text-center relative border-emerald-500/80">
@@ -420,7 +419,6 @@
     </div>
   </div>
 
-
   <!-- ==================== Modal 3: 戰報卡 ==================== -->
   <div id="cardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
     <div class="max-w-md w-full flex flex-col items-center my-auto">
@@ -439,15 +437,18 @@
     </div>
   </div>
 
-
   <!-- JS 邏輯核心 -->
   <script>
-    // 管理員與動態密碼儲存（無預設通用解鎖碼）
     const adminAccount = "aimincvv168";
-    let dynamicPasscodes = loadPasscodes(); // [{ code: 'VIP888', expiresAt: timestamp }]
-    let isFullUnlocked = false; // 是否已完全解鎖權限
+    let dynamicPasscodes = loadPasscodes(); 
+    let isFullUnlocked = false; 
 
-    let countdownSeconds = 30; // 30秒自動更換一次房號
+    // 5 分鐘冷卻變數 (300 秒)
+    const COOLDOWN_DURATION = 300; 
+    let cooldownRemaining = 0;
+    let cooldownTimer = null;
+
+    let countdownSeconds = 300; // 頂部倒數 5 分鐘
     let countdownTimer = null;
 
     const allowedBets = [
@@ -463,7 +464,6 @@
       startAutoRefreshCountdown();
     });
 
-    // 讀取/儲存管理員發行的動態密碼至 LocalStorage
     function loadPasscodes() {
       const saved = localStorage.getItem('seth_issued_passcodes');
       return saved ? JSON.parse(saved) : [];
@@ -514,7 +514,6 @@
         return;
       }
 
-      // 驗證成功
       errBox.classList.add('hidden');
       enterDashboard(true);
     }
@@ -569,24 +568,101 @@
       renderVipRooms();
     }
 
-    // 4. 定時自動刷新倒數 (30 秒刷新一次 0001-4100 隨機房號)
+    // 格式化時間 (分:秒)
+    function formatMMSS(totalSeconds) {
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // 4. 定時自動刷新倒數 (5 分鐘)
     function startAutoRefreshCountdown() {
       if (countdownTimer) clearInterval(countdownTimer);
-      countdownSeconds = 30;
+      countdownSeconds = COOLDOWN_DURATION;
 
       countdownTimer = setInterval(() => {
         countdownSeconds--;
         const cdElem = document.getElementById('refreshCountdown');
-        if (cdElem) cdElem.innerText = `${countdownSeconds}s`;
+        if (cdElem) cdElem.innerText = formatMMSS(countdownSeconds);
 
         if (countdownSeconds <= 0) {
           triggerOracle(true); // 自動更換房號
-          countdownSeconds = 30;
+          countdownSeconds = COOLDOWN_DURATION;
         }
       }, 1000);
     }
 
-    // 5. 管理員 Modal 邏輯
+    // 5. 兩顆按鈕共用的點擊與 5 分鐘冷卻機制
+    function triggerAction() {
+      if (cooldownRemaining > 0) return; // 冷卻中不可再點擊
+
+      // 觸發重新計算與選房
+      triggerOracle(false);
+
+      // 開始 5 分鐘 (300 秒) 共用冷卻
+      startSharedCooldown(COOLDOWN_DURATION);
+    }
+
+    function startSharedCooldown(seconds) {
+      cooldownRemaining = seconds;
+      
+      // 重置頂部 5 分鐘倒數
+      countdownSeconds = COOLDOWN_DURATION;
+      document.getElementById('refreshCountdown').innerText = formatMMSS(COOLDOWN_DURATION);
+
+      updateButtonUI(true);
+
+      if (cooldownTimer) clearInterval(cooldownTimer);
+
+      cooldownTimer = setInterval(() => {
+        cooldownRemaining--;
+        updateButtonUI(true);
+
+        if (cooldownRemaining <= 0) {
+          clearInterval(cooldownTimer);
+          cooldownTimer = null;
+          updateButtonUI(false);
+        }
+      }, 1000);
+    }
+
+    function updateButtonUI(isCooling) {
+      const calcBtn = document.getElementById('calcStrategyBtn');
+      const calcBtnText = document.getElementById('calcBtnText');
+      const refreshBtn = document.getElementById('manualRefreshBtn');
+      const refreshBtnText = document.getElementById('refreshBtnText');
+
+      if (isCooling) {
+        const timeStr = formatMMSS(cooldownRemaining);
+
+        // 按鈕 1 禁用狀態
+        calcBtn.disabled = true;
+        calcBtn.classList.remove('hover:brightness-125', 'active:scale-95', 'pulse-btn', 'from-neon-red', 'via-neon-pink', 'to-neon-purple');
+        calcBtn.classList.add('bg-gray-800', 'text-gray-400', 'border-gray-600', 'cursor-not-allowed', 'opacity-60');
+        calcBtnText.innerText = `冷卻中 (${timeStr})`;
+
+        // 按鈕 2 禁用狀態
+        refreshBtn.disabled = true;
+        refreshBtn.classList.remove('hover:bg-neon-purple/40', 'text-purple-300', 'border-neon-purple/50');
+        refreshBtn.classList.add('bg-gray-800/50', 'text-gray-500', 'border-gray-700', 'cursor-not-allowed');
+        refreshBtnText.innerText = `冷卻中 (${timeStr})`;
+
+      } else {
+        // 按鈕 1 恢復啟用
+        calcBtn.disabled = false;
+        calcBtn.classList.remove('bg-gray-800', 'text-gray-400', 'border-gray-600', 'cursor-not-allowed', 'opacity-60');
+        calcBtn.classList.add('bg-gradient-to-r', 'from-neon-red', 'via-neon-pink', 'to-neon-purple', 'hover:brightness-125', 'active:scale-95', 'pulse-btn');
+        calcBtnText.innerText = '計算最適打法';
+
+        // 按鈕 2 恢復啟用
+        refreshBtn.disabled = false;
+        refreshBtn.classList.remove('bg-gray-800/50', 'text-gray-500', 'border-gray-700', 'cursor-not-allowed');
+        refreshBtn.classList.add('hover:bg-neon-purple/40', 'text-purple-300', 'border-neon-purple/50');
+        refreshBtnText.innerText = '手動刷新';
+      }
+    }
+
+    // 管理員 Modal 邏輯
     function openAdminModal() {
       renderIssuedPasscodes();
       document.getElementById('adminModal').classList.remove('hidden');
@@ -606,7 +682,6 @@
 
       const expiresAt = Date.now() + minutes * 60 * 1000;
       
-      // 若密碼已存在則更新過期時間
       const existingIdx = dynamicPasscodes.findIndex(item => item.code === newKey);
       if (existingIdx >= 0) {
         dynamicPasscodes[existingIdx].expiresAt = expiresAt;
@@ -661,7 +736,7 @@
       });
     }
 
-    // 6. 背景動態粒子繪製
+    // 背景動態粒子繪製
     const canvas = document.getElementById('cyberCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -706,7 +781,7 @@
       document.getElementById('onlineCount').innerText = (3400 + Math.floor(Math.random() * 90)).toLocaleString() + ' 人';
     }, 2500);
 
-    // 7. 試算邏輯
+    // 試算邏輯
     function setCapital(val) {
       document.getElementById('capitalInput').value = val;
       calculateStrategy();
@@ -760,11 +835,9 @@
       } else {
         renderVipRooms();
       }
-      
-      countdownSeconds = 30; // 重置倒數
     }
 
-    // 8. 房號 0001 - 4100 隨機生成器
+    // 房號 0001 - 4100 隨機生成器
     function getRandomRoomNumber() {
       const num = Math.floor(Math.random() * 4100) + 1; // 1 ~ 4100
       return '#' + String(num).padStart(4, '0') + ' 號房';
@@ -776,13 +849,11 @@
     ];
 
     function renderVipRooms() {
-      // 1. 更新首選帝王房
       const mainRoom = getRandomRoomNumber();
       const mainRate = (98.0 + Math.random() * 1.8).toFixed(1);
       document.getElementById('mainRoomNum').innerText = mainRoom;
       document.getElementById('rateText1').innerText = mainRate + '%';
 
-      // 2. 隨機生成 10 個不重複的 0001-4100 房號
       const usedRooms = new Set([mainRoom]);
       const vipContainer = document.getElementById('vipRoomContainer');
       vipContainer.innerHTML = '';
@@ -844,7 +915,6 @@
       }
     }
 
-    // Modal 控制邏輯
     function openVipModal(roomNum, rate) {
       document.getElementById('modalRoomTag').innerText = roomNum;
       document.getElementById('modalRateTag').innerText = rate;
@@ -854,22 +924,19 @@
       document.getElementById('vipModal').classList.add('hidden');
     }
 
-    // 9. 戰報卡圖片生成 (包含動態 4 位數房號)
+    // 戰報卡圖片生成
     function generateCardCanvas() {
       const modal = document.getElementById('cardModal');
       const c = document.getElementById('reportCanvas');
       const ctx = c.getContext('2d');
 
-      // 繪製背景
       ctx.fillStyle = '#0a0306';
       ctx.fillRect(0, 0, 540, 960);
 
-      // 邊框
       ctx.strokeStyle = '#FF003C';
       ctx.lineWidth = 8;
       ctx.strokeRect(20, 20, 500, 920);
 
-      // 標題
       ctx.fillStyle = '#FF2A7A';
       ctx.font = '900 36px Orbitron';
       ctx.textAlign = 'center';
@@ -879,7 +946,6 @@
       ctx.font = 'bold 22px Noto Sans TC';
       ctx.fillText('戰神賽特 · 數據分析戰力卡', 270, 130);
 
-      // 內文框
       ctx.fillStyle = 'rgba(255, 0, 60, 0.1)';
       ctx.fillRect(50, 170, 440, 600);
       ctx.strokeStyle = 'rgba(255, 0, 60, 0.4)';
@@ -920,7 +986,6 @@
       ctx.font = '900 36px Orbitron';
       ctx.fillText(spinsText, 80, 670);
 
-      // 底部說明
       ctx.textAlign = 'center';
       ctx.fillStyle = '#888888';
       ctx.font = '16px Orbitron';
