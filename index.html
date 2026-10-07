@@ -123,7 +123,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between relative selection:bg-neon-red selection:text-white">
 
-  <!-- 背景動畫 -->
+  <!-- 背景動態光效與粒子 -->
   <div class="glow-orb-1"></div>
   <div class="glow-orb-2"></div>
   <canvas id="cyberCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
@@ -139,9 +139,9 @@
       <h1 class="text-2xl font-mono font-black tracking-widest neon-solid-text mb-1">牛老大專屬</h1>
       <p class="text-xs text-pink-200/80 font-medium mb-6">戰神賽特 · 數據演算法選房終端系統</p>
 
-      <!-- 錯誤與過期提示 -->
+      <!-- 錯誤提示 -->
       <div id="authErrorMsg" class="hidden mb-4 p-3 bg-red-950/80 border border-red-500/80 rounded-xl text-red-300 text-xs font-bold animate-bounce">
-        <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="authErrorText">通行密碼不正確，請重新輸入！</span>
+        <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="authErrorText">通行密碼無效，請重新輸入！</span>
       </div>
 
       <!-- 輸入通行密碼 -->
@@ -150,7 +150,6 @@
           <label class="block text-xs font-bold text-gray-300 mb-2">請輸入通行密碼</label>
           <div class="relative">
             <input type="password" id="passcodeKey" placeholder="請輸入解鎖密碼..." 
-              onkeydown="if(event.key === 'Enter') verifyPasscode()"
               class="w-full bg-black/80 border border-neon-red/60 rounded-xl px-4 py-3.5 text-white font-mono focus:outline-none focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/50 transition shadow-inner text-sm">
             <button onclick="verifyPasscode()" class="absolute right-2 top-2 bg-gradient-to-r from-neon-red to-neon-pink hover:brightness-125 text-white text-xs font-black px-4 py-2 rounded-lg transition shadow-md">
               解鎖驗證
@@ -172,7 +171,7 @@
       </div>
 
       <div class="mt-8 text-[10px] text-gray-500 font-mono border-t border-white/10 pt-4">
-        SETH ENGINE v3.5 · DYNAMIC ENCRYPTED ACCESS
+        SETH ENGINE v3.6 · DYNAMIC ROOM SELECTION (0001-4100)
       </div>
 
     </div>
@@ -192,7 +191,7 @@
             <h1 class="text-xl font-mono font-black tracking-widest neon-solid-text flex items-center gap-2">
               牛老大專屬 <span id="userRoleBadge" class="bg-gradient-to-r from-neon-red to-neon-purple text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-normal shadow-md shadow-neon-red/40">VIP 完整解鎖</span>
             </h1>
-            <p class="text-[11px] text-pink-200/80 font-medium">戰神賽特 · 數據演算法選房終端</p>
+            <p class="text-[11px] text-pink-200/80 font-medium">戰神賽特 · 數據演算法選房終端 (房號 #0001~#4100)</p>
           </div>
         </div>
         
@@ -200,9 +199,6 @@
           <div id="trialBadge" class="hidden bg-neon-purple/30 border border-neon-purple/60 text-purple-200 text-xs px-3 py-1.5 rounded-full font-mono font-bold animate-pulse">
             <i class="fa-solid fa-stopwatch mr-1"></i> 試用剩餘: <span id="trialTimer">10:00</span>
           </div>
-          <button onclick="location.reload()" class="bg-black/60 hover:bg-neon-red/30 border border-neon-red/40 text-gray-300 text-xs px-3.5 py-1.5 rounded-full transition">
-            <i class="fa-solid fa-right-from-bracket mr-1"></i> 退出/鎖定
-          </button>
           <a href="https://lin.ee/W2g5kgf" target="_blank" class="hidden sm:flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-5 py-2 rounded-full shadow-lg transition duration-300 hover:scale-105 border border-emerald-300">
             <i class="fa-brands fa-line text-lg"></i>
             <span>LINE 官方客服</span>
@@ -213,9 +209,9 @@
       <div class="bg-black/80 border-t border-neon-red/30 text-[11px] py-2 px-4 text-gray-300 flex justify-between overflow-x-auto whitespace-nowrap backdrop-blur-md">
         <div class="flex space-x-8 mx-auto items-center font-mono">
           <span><i class="fa-solid fa-bolt text-neon-red mr-1.5 animate-pulse"></i> API 延遲: <strong id="pingText" class="text-emerald-400">8ms</strong></span>
-          <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 防護等級: <strong class="text-cyan-400">時效動態加密</strong></span>
+          <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 防護等級: <strong class="text-cyan-400">動態加密全開</strong></span>
           <span><i class="fa-solid fa-users text-neon-purple mr-1.5"></i> 在線人數: <strong id="onlineCount" class="text-purple-300">3,450 人</strong></span>
-          <span><i class="fa-solid fa-fire text-neon-pink mr-1.5"></i> 熱門爆分池: <strong class="text-neon-pink">#087, #142, #209</strong></span>
+          <span><i class="fa-solid fa-rotate text-neon-pink mr-1.5 animate-spin"></i> 下次數據更新: <strong id="refreshCountdown" class="text-neon-pink font-bold">30s</strong></span>
         </div>
       </div>
     </header>
@@ -267,7 +263,7 @@
         </div>
       </section>
 
-      <!-- 右側：房號區 -->
+      <!-- 右側：房號區 (範圍 0001-4100 動態更換) -->
       <section class="lg:col-span-7 flex flex-col space-y-6">
         <div class="cyber-card rounded-2xl p-6 flex-grow flex flex-col justify-between overflow-hidden">
           
@@ -277,8 +273,8 @@
               <div class="absolute inset-2 rounded-full border-2 border-cyan-400/20 border-b-cyan-400 animate-spin" style="animation-direction: reverse;"></div>
               <span class="text-4xl animate-pulse text-neon-pink">𓁦</span>
             </div>
-            <div class="text-neon-pink font-mono font-bold text-lg tracking-widest animate-pulse">OPTIMIZING STRATEGY...</div>
-            <p class="text-xs text-gray-400 mt-2 font-mono">RE-CALCULATING 10 VIP ROOMS &amp; SEED POOLS...</p>
+            <div class="text-neon-pink font-mono font-bold text-lg tracking-widest animate-pulse">CALCULATING 4,100 ROOM POOLS...</div>
+            <p class="text-xs text-gray-400 mt-2 font-mono">FETCHING REAL-TIME SEED POOLS (#0001-#4100)...</p>
           </div>
 
           <div>
@@ -286,18 +282,23 @@
               <h2 class="text-base font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-door-open text-neon-red text-lg"></i> 系統推薦勝率房號 (主推 + 10間 VIP)
               </h2>
-              <div class="flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                <span class="text-xs text-emerald-400 font-mono font-bold">LIVE MONITORING</span>
+              <div class="flex items-center space-x-3">
+                <button onclick="triggerOracle()" class="text-xs bg-neon-purple/20 hover:bg-neon-purple/40 text-purple-300 border border-neon-purple/50 px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-mono">
+                  <i class="fa-solid fa-arrows-rotate"></i> 手動刷新
+                </button>
+                <div class="flex items-center space-x-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span class="text-xs text-emerald-400 font-mono font-bold">LIVE</span>
+                </div>
               </div>
             </div>
 
-            <!-- 首選主推房 -->
+            <!-- 首選主推房號 -->
             <div class="mb-5 bg-black/80 border border-neon-red/80 rounded-2xl p-4.5 hover-cyber group relative overflow-hidden shadow-lg">
               <div class="flex justify-between items-start">
                 <div>
                   <span class="text-[10px] bg-neon-red/20 text-neon-pink px-2.5 py-0.5 rounded-full border border-neon-red/50 font-bold shadow-sm shadow-neon-red/30">首選勝率帝王房</span>
-                  <div id="mainRoomNum" class="text-3xl font-black text-white mt-2 font-mono tracking-tight group-hover:text-neon-pink transition drop-shadow">#087 號房</div>
+                  <div id="mainRoomNum" class="text-3xl font-black text-white mt-2 font-mono tracking-tight group-hover:text-neon-pink transition drop-shadow">#0087 號房</div>
                 </div>
                 <div class="text-right">
                   <div class="text-xs text-gray-400 font-medium">爆分預測指數</div>
@@ -306,17 +307,17 @@
               </div>
               
               <div class="mt-4 pt-3 border-t border-white/10 flex justify-between items-center text-xs">
-                <span class="text-gray-300 flex items-center gap-1"><i class="fa-solid fa-fire text-neon-pink animate-pulse"></i> 高倍數乘數訊號極強</span>
+                <span class="text-gray-300 flex items-center gap-1"><i class="fa-solid fa-fire text-neon-pink animate-pulse"></i> 高倍數乘數訊號極強 (即時聯網監控)</span>
                 <a href="https://cvv005.mw168.online" target="_blank" class="bg-neon-red/20 hover:bg-neon-red text-neon-pink hover:text-white border border-neon-red/60 font-bold px-3.5 py-1.5 rounded-lg transition shadow-md">前往機台 ➔</a>
               </div>
             </div>
 
-            <!-- VIP 10 間 -->
+            <!-- VIP 10 間動態房號 (從 0001-4100 隨機生成) -->
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-                <i class="fa-solid fa-crown text-neon-purple"></i> VIP 獨家爆分房池 (共 10 間)
+                <i class="fa-solid fa-crown text-neon-purple"></i> VIP 獨家爆分房池 (#0001~#4100 隨機監控)
               </span>
-              <span class="text-[10px] text-gray-400">上下滑動查看更多 🠇</span>
+              <span class="text-[10px] text-gray-400">定時輪播更新 🠇</span>
             </div>
 
             <div id="vipRoomContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
@@ -354,57 +355,38 @@
         </div>
         <div>
           <h3 class="text-lg font-black text-white">管理員發行控制台</h3>
-          <p class="text-[11px] text-gray-400 font-mono">ADMIN LOGIN: aimincvv168</p>
+          <p class="text-[11px] text-gray-400 font-mono">ADMIN: aimincvv168</p>
         </div>
       </div>
 
       <div class="space-y-4">
-        <!-- 發行新密碼區塊 -->
-        <div class="bg-black/60 border border-neon-purple/40 rounded-xl p-3.5 space-y-3">
-          <label class="block text-xs font-bold text-purple-200 flex items-center justify-between">
-            <span><i class="fa-solid fa-key text-neon-pink mr-1"></i> 發行動態通行密碼</span>
-            <span class="text-[10px] text-gray-400 font-mono">TIMED PASSCODE</span>
-          </label>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <input type="text" id="newPasscodeKey" placeholder="例如: SETH666" 
-              class="w-full bg-black/80 border border-neon-purple/60 rounded-xl px-3 py-2 text-white font-mono text-sm focus:outline-none focus:border-neon-pink">
+        <div class="bg-black/60 border border-neon-red/30 p-3.5 rounded-xl space-y-3">
+          <label class="block text-xs font-bold text-gray-200">新增動態時效通行密碼</label>
+          <div class="flex space-x-2">
+            <input type="text" id="newPasscodeKey" placeholder="設定密碼 (如: SETH2026)" 
+              class="flex-1 bg-black/80 border border-neon-purple/60 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-neon-pink">
             
-            <select id="passcodeDurationSelect" onchange="toggleCustomDurationInput()" class="bg-black/80 border border-neon-purple/60 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-neon-pink">
-              <option value="10">有效時間：10 分鐘</option>
-              <option value="60">有效時間：1 小時</option>
-              <option value="1440">有效時間：24 小時</option>
-              <option value="10080">有效時間：7 天</option>
-              <option value="custom">自訂時間 (分鐘)</option>
+            <select id="passcodeDuration" class="bg-black/80 border border-neon-purple/60 text-purple-200 text-xs rounded-xl px-2 py-2 font-mono focus:outline-none">
+              <option value="10">10 分鐘</option>
+              <option value="60">1 小時</option>
+              <option value="1440" selected>24 小時</option>
+              <option value="10080">7 天</option>
             </select>
-          </div>
 
-          <div id="customDurationWrapper" class="hidden">
-            <input type="number" id="customDurationMinutes" placeholder="請輸入分鐘數 (例如: 30)" 
-              class="w-full bg-black/80 border border-neon-pink/60 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-neon-pink">
-          </div>
-
-          <button onclick="addNewPasscode()" class="w-full bg-gradient-to-r from-neon-purple to-neon-pink hover:brightness-125 text-white font-bold py-2.5 rounded-xl text-xs shadow-md flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-plus-circle"></i>
-            <span>生成並發行密碼</span>
-          </button>
-        </div>
-
-        <!-- 清單列表 -->
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <label class="block text-xs font-bold text-gray-300">已發行通行密碼監控</label>
-            <button onclick="clearExpiredPasscodes()" class="text-[10px] text-neon-pink hover:underline font-mono">
-              <i class="fa-solid fa-trash-can mr-1"></i>一鍵清除已過期
+            <button onclick="addNewPasscode()" class="bg-gradient-to-r from-neon-purple to-neon-pink hover:brightness-125 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md shrink-0">
+              發行密碼
             </button>
           </div>
-          <div id="issuedPasscodesList" class="bg-black/60 border border-white/10 rounded-xl p-2.5 max-h-48 overflow-y-auto space-y-2 font-mono text-xs custom-scrollbar">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-300 mb-2">已發行密碼清單 (即時狀態檢測)</label>
+          <div id="issuedPasscodesList" class="bg-black/60 border border-white/10 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 font-mono text-xs custom-scrollbar">
           </div>
         </div>
 
-        <button onclick="closeAdminModal(); enterDashboard(true);" class="w-full bg-neon-red hover:bg-red-600 text-white font-bold py-3 rounded-xl transition text-xs shadow-lg mt-2 flex items-center justify-center gap-2">
-          <span>進入主選房系統 (管理者權限)</span>
-          <i class="fa-solid fa-arrow-right"></i>
+        <button onclick="closeAdminModal(); enterDashboard(true);" class="w-full bg-neon-red hover:bg-red-600 text-white font-bold py-3 rounded-xl transition text-xs shadow-lg mt-2">
+          進入主選房系統 (管理者權限) ➔
         </button>
       </div>
     </div>
@@ -426,7 +408,7 @@
       <p class="text-xs text-gray-300 leading-relaxed mb-6">
         您當前為 <strong class="text-neon-purple">免費試用體驗模式</strong>。<br>
         監控顯示 <strong id="modalRoomTag" class="text-neon-pink">VIP 房號</strong> 的咬度回饋率高達 <strong id="modalRateTag" class="text-emerald-400">99.2%</strong>！<br><br>
-        請加入 <strong class="text-emerald-400">LINE 官方帳號</strong> 即可免費領取時效通行密碼解鎖完整內容！
+        請加入 <strong class="text-emerald-400">LINE 官方帳號</strong> 即可免費領取通行密碼解鎖完整內容！
       </p>
 
       <a href="https://lin.ee/W2g5kgf" target="_blank" class="w-full block bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl shadow-lg shadow-emerald-600/40 transition duration-300 mb-3 border border-emerald-300 flex items-center justify-center space-x-2">
@@ -460,13 +442,13 @@
 
   <!-- JS 邏輯核心 -->
   <script>
-    // 管理員指定帳號
+    // 管理員與動態密碼儲存（無預設通用解鎖碼）
     const adminAccount = "aimincvv168";
-    
-    // 預設完全無任何預設通行密碼，資料庫儲存結構: [{ code: 'xxx', createdAt: timestamp, expiresAt: timestamp }]
-    let storedPasscodes = JSON.parse(localStorage.getItem('seth_passcodes_db') || '[]');
-    
+    let dynamicPasscodes = loadPasscodes(); // [{ code: 'VIP888', expiresAt: timestamp }]
     let isFullUnlocked = false; // 是否已完全解鎖權限
+
+    let countdownSeconds = 30; // 30秒自動更換一次房號
+    let countdownTimer = null;
 
     const allowedBets = [
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 30, 32, 36, 
@@ -476,14 +458,19 @@
       1280, 1400, 1440, 1600, 1800, 2000
     ];
 
-    // 初始化檢查：今日是否已經試用過
     window.addEventListener('DOMContentLoaded', () => {
       checkTrialStatus();
-      savePasscodesToStorage(); // 確保格式同步
+      startAutoRefreshCountdown();
     });
 
-    function savePasscodesToStorage() {
-      localStorage.setItem('seth_passcodes_db', JSON.stringify(storedPasscodes));
+    // 讀取/儲存管理員發行的動態密碼至 LocalStorage
+    function loadPasscodes() {
+      const saved = localStorage.getItem('seth_issued_passcodes');
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    function savePasscodes() {
+      localStorage.setItem('seth_issued_passcodes', JSON.stringify(dynamicPasscodes));
     }
 
     function checkTrialStatus() {
@@ -500,44 +487,36 @@
       }
     }
 
-    // 1. 驗證密碼邏輯 (包含過期時間檢查)
+    // 1. 驗證密碼邏輯
     function verifyPasscode() {
       const input = document.getElementById('passcodeKey').value.trim();
       const errBox = document.getElementById('authErrorMsg');
       const errText = document.getElementById('authErrorText');
 
-      if (!input) {
-        errText.innerText = '請先輸入通行密碼！';
-        errBox.classList.remove('hidden');
-        return;
-      }
-
-      // 管理員專用通道
       if (input === adminAccount) {
         errBox.classList.add('hidden');
         openAdminModal();
         return;
       }
 
-      // 搜尋匹配的密碼記錄
-      const foundIndex = storedPasscodes.findIndex(item => item.code === input);
+      const now = Date.now();
+      const foundKey = dynamicPasscodes.find(item => item.code === input);
 
-      if (foundIndex !== -1) {
-        const targetPass = storedPasscodes[foundIndex];
-        const now = Date.now();
-
-        // 檢查是否超過有效時間
-        if (now > targetPass.expiresAt) {
-          errText.innerText = '此通行密碼已過期失效，請聯繫管理員重新領取！';
-          errBox.classList.remove('hidden');
-        } else {
-          errBox.classList.add('hidden');
-          enterDashboard(true); // 驗證成功：完整解鎖
-        }
-      } else {
-        errText.innerText = '通行密碼無效或不存在，請重新輸入！';
+      if (!foundKey) {
+        errText.innerText = '無效的通行密碼，請聯繫管理員！';
         errBox.classList.remove('hidden');
+        return;
       }
+
+      if (now > foundKey.expiresAt) {
+        errText.innerText = '此通行密碼已過期失效！請聯繫管理員重新發行。';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      // 驗證成功
+      errBox.classList.add('hidden');
+      enterDashboard(true);
     }
 
     // 2. 免費試用邏輯
@@ -551,9 +530,9 @@
       }
 
       document.getElementById('trialBadge').classList.remove('hidden');
-      enterDashboard(false); // 免費試用模式 (VIP鎖定)
+      enterDashboard(false);
 
-      let timeLeft = 600; // 10分鐘
+      let timeLeft = 600;
       const timerElem = document.getElementById('trialTimer');
 
       const interval = setInterval(() => {
@@ -565,13 +544,13 @@
         if (timeLeft <= 0) {
           clearInterval(interval);
           localStorage.setItem('seth_trial_used_date', todayStr);
-          alert('您的 10 分鐘免費試用已結束！請輸入通行密碼領取完整體驗權限。');
+          alert('您的 10 分鐘免費試用已結束！系統已自動剔除。請輸入通行密碼領取完整體驗權限。');
           location.reload();
         }
       }, 1000);
     }
 
-    // 進入主儀表板
+    // 3. 進入主選房儀表板
     function enterDashboard(fullUnlocked = false) {
       isFullUnlocked = fullUnlocked;
       
@@ -590,139 +569,99 @@
       renderVipRooms();
     }
 
-    // 3. 管理員 Modal 邏輯與密碼發行/刪除/時間控制
+    // 4. 定時自動刷新倒數 (30 秒刷新一次 0001-4100 隨機房號)
+    function startAutoRefreshCountdown() {
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownSeconds = 30;
+
+      countdownTimer = setInterval(() => {
+        countdownSeconds--;
+        const cdElem = document.getElementById('refreshCountdown');
+        if (cdElem) cdElem.innerText = `${countdownSeconds}s`;
+
+        if (countdownSeconds <= 0) {
+          triggerOracle(true); // 自動更換房號
+          countdownSeconds = 30;
+        }
+      }, 1000);
+    }
+
+    // 5. 管理員 Modal 邏輯
     function openAdminModal() {
       renderIssuedPasscodes();
       document.getElementById('adminModal').classList.remove('hidden');
     }
-    
     function closeAdminModal() {
       document.getElementById('adminModal').classList.add('hidden');
     }
 
-    function toggleCustomDurationInput() {
-      const selectVal = document.getElementById('passcodeDurationSelect').value;
-      const customWrapper = document.getElementById('customDurationWrapper');
-      if (selectVal === 'custom') {
-        customWrapper.classList.remove('hidden');
-      } else {
-        customWrapper.classList.add('hidden');
-      }
-    }
-
     function addNewPasscode() {
       const newKey = document.getElementById('newPasscodeKey').value.trim();
-      const durationSelect = document.getElementById('passcodeDurationSelect').value;
-      let durationMinutes = 0;
+      const minutes = parseInt(document.getElementById('passcodeDuration').value, 10);
 
       if (!newKey) {
-        alert('請輸入要發行的通行密碼！');
+        alert('請輸入要設定的密碼！');
         return;
       }
 
-      if (durationSelect === 'custom') {
-        durationMinutes = parseInt(document.getElementById('customDurationMinutes').value) || 0;
-        if (durationMinutes <= 0) {
-          alert('請輸入有效的自訂分鐘數！');
-          return;
-        }
-      } else {
-        durationMinutes = parseInt(durationSelect);
-      }
-
-      // 檢查密碼是否已存在，若存在則更新其過期時間
-      const now = Date.now();
-      const expiresAt = now + durationMinutes * 60 * 1000;
-
-      const existingIndex = storedPasscodes.findIndex(item => item.code === newKey);
-      if (existingIndex !== -1) {
-        storedPasscodes[existingIndex] = { code: newKey, createdAt: now, expiresAt: expiresAt };
-      } else {
-        storedPasscodes.push({ code: newKey, createdAt: now, expiresAt: expiresAt });
-      }
-
-      savePasscodesToStorage();
-      document.getElementById('newPasscodeKey').value = '';
-      document.getElementById('customDurationMinutes').value = '';
-      renderIssuedPasscodes();
-      alert(`成功發行密碼: [${newKey}]\n有效時間: ${durationMinutes} 分鐘`);
-    }
-
-    function deletePasscode(codeToDelete) {
-      storedPasscodes = storedPasscodes.filter(item => item.code !== codeToDelete);
-      savePasscodesToStorage();
-      renderIssuedPasscodes();
-    }
-
-    function clearExpiredPasscodes() {
-      const now = Date.now();
-      storedPasscodes = storedPasscodes.filter(item => item.expiresAt > now);
-      savePasscodesToStorage();
-      renderIssuedPasscodes();
-    }
-
-    function formatTimeStr(timestamp) {
-      const d = new Date(timestamp);
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const date = String(d.getDate()).padStart(2, '0');
-      const hours = String(d.getHours()).padStart(2, '0');
-      const mins = String(d.getMinutes()).padStart(2, '0');
-      return `${month}/${date} ${hours}:${mins}`;
-    }
-
-    function getRemainingTimeStr(expiresAt) {
-      const diffSecs = Math.floor((expiresAt - Date.now()) / 1000);
-      if (diffSecs <= 0) return '已過期';
+      const expiresAt = Date.now() + minutes * 60 * 1000;
       
-      const mins = Math.floor(diffSecs / 60);
-      const hours = Math.floor(mins / 60);
-      const days = Math.floor(hours / 24);
+      // 若密碼已存在則更新過期時間
+      const existingIdx = dynamicPasscodes.findIndex(item => item.code === newKey);
+      if (existingIdx >= 0) {
+        dynamicPasscodes[existingIdx].expiresAt = expiresAt;
+      } else {
+        dynamicPasscodes.push({ code: newKey, expiresAt: expiresAt });
+      }
 
-      if (days > 0) return `${days}天 ${hours % 24}小時`;
-      if (hours > 0) return `${hours}小時 ${mins % 60}分`;
-      return `${mins} 分鐘`;
+      savePasscodes();
+      document.getElementById('newPasscodeKey').value = '';
+      renderIssuedPasscodes();
+      alert(`密碼 [${newKey}] 發行成功！時效：${minutes} 分鐘`);
+    }
+
+    function deletePasscode(code) {
+      dynamicPasscodes = dynamicPasscodes.filter(item => item.code !== code);
+      savePasscodes();
+      renderIssuedPasscodes();
     }
 
     function renderIssuedPasscodes() {
       const list = document.getElementById('issuedPasscodesList');
       list.innerHTML = '';
-      const now = Date.now();
 
-      if (storedPasscodes.length === 0) {
-        list.innerHTML = `<div class="text-center text-gray-500 py-4 text-xs font-mono">目前尚無已發行之通行密碼</div>`;
+      if (dynamicPasscodes.length === 0) {
+        list.innerHTML = `<div class="text-gray-500 text-center py-4">目前尚無發行的密碼，請於上方發行</div>`;
         return;
       }
 
-      storedPasscodes.forEach((item) => {
+      const now = Date.now();
+      dynamicPasscodes.forEach((item) => {
         const isExpired = now > item.expiresAt;
-        const remainStr = getRemainingTimeStr(item.expiresAt);
+        const expireDateStr = new Date(item.expiresAt).toLocaleString('zh-TW', { hour12: false });
 
-        const card = document.createElement('div');
-        card.className = `p-2.5 rounded-lg border flex flex-col justify-between space-y-1.5 ${
-          isExpired ? 'bg-red-950/20 border-red-900/50 text-gray-400' : 'bg-black/50 border-purple-900/50 text-white'
-        }`;
-
-        card.innerHTML = `
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-sm ${isExpired ? 'line-through text-red-400' : 'text-neon-pink'} font-mono">${item.code}</span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${
-              isExpired ? 'bg-red-900/40 text-red-300 border border-red-700/50' : 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/50'
-            }">
-              ${isExpired ? '已失效' : '有效中: ' + remainStr}
-            </span>
+        const div = document.createElement('div');
+        div.className = `flex justify-between items-center p-2 rounded-lg border ${isExpired ? 'bg-red-950/40 border-red-800/50' : 'bg-white/5 border-white/10'}`;
+        
+        div.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-sm ${isExpired ? 'text-gray-400 line-through' : 'text-neon-pink'}">${item.code}</span>
+              <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${isExpired ? 'bg-red-900/60 text-red-300' : 'bg-emerald-900/60 text-emerald-300'}">
+                ${isExpired ? '已過期' : '生效中'}
+              </span>
+            </div>
+            <div class="text-[10px] text-gray-400 mt-0.5">到期時間: ${expireDateStr}</div>
           </div>
-          <div class="flex justify-between items-center text-[10px] text-gray-400 font-mono">
-            <span>建立: ${formatTimeStr(item.createdAt)} | 到期: ${formatTimeStr(item.expiresAt)}</span>
-            <button onclick="deletePasscode('${item.code}')" class="text-red-400 hover:text-red-300 ml-2">
-              <i class="fa-solid fa-trash"></i> 刪除
-            </button>
-          </div>
+          <button onclick="deletePasscode('${item.code}')" class="text-xs text-red-400 hover:text-red-200 px-2 py-1 rounded bg-red-950/60 border border-red-800/40">
+            刪除
+          </button>
         `;
-        list.appendChild(card);
+        list.appendChild(div);
       });
     }
 
-    // 4. 背景動態粒子 (賽博龐克)
+    // 6. 背景動態粒子繪製
     const canvas = document.getElementById('cyberCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -767,7 +706,7 @@
       document.getElementById('onlineCount').innerText = (3400 + Math.floor(Math.random() * 90)).toLocaleString() + ' 人';
     }, 2500);
 
-    // 5. 試算邏輯
+    // 7. 試算邏輯
     function setCapital(val) {
       document.getElementById('capitalInput').value = val;
       calculateStrategy();
@@ -808,31 +747,55 @@
       stratElem.className = `text-xs px-3 py-1 rounded-full font-bold border ${strategyColor}`;
     }
 
-    function triggerOracle() {
-      const overlay = document.getElementById('scanningOverlay');
-      overlay.classList.remove('hidden');
+    function triggerOracle(silent = false) {
+      if (!silent) {
+        const overlay = document.getElementById('scanningOverlay');
+        overlay.classList.remove('hidden');
 
-      setTimeout(() => {
-        calculateStrategy();
+        setTimeout(() => {
+          calculateStrategy();
+          renderVipRooms();
+          overlay.classList.add('hidden');
+        }, 1000);
+      } else {
         renderVipRooms();
-        overlay.classList.add('hidden');
-      }, 1200);
+      }
+      
+      countdownSeconds = 30; // 重置倒數
     }
 
-    // 6. VIP 房號渲染
+    // 8. 房號 0001 - 4100 隨機生成器
+    function getRandomRoomNumber() {
+      const num = Math.floor(Math.random() * 4100) + 1; // 1 ~ 4100
+      return '#' + String(num).padStart(4, '0') + ' 號房';
+    }
+
     const vipTags = [
       "累積咬度爆滿", "連開大獎池", "高額倍率訊號", "大戶特選卡池", "黃金週期熱卡",
       "高吐分回饋", "長線穩健池", "進入爆發期", "買 Buy 高回報", "即時飆升房"
     ];
 
     function renderVipRooms() {
+      // 1. 更新首選帝王房
+      const mainRoom = getRandomRoomNumber();
+      const mainRate = (98.0 + Math.random() * 1.8).toFixed(1);
+      document.getElementById('mainRoomNum').innerText = mainRoom;
+      document.getElementById('rateText1').innerText = mainRate + '%';
+
+      // 2. 隨機生成 10 個不重複的 0001-4100 房號
+      const usedRooms = new Set([mainRoom]);
       const vipContainer = document.getElementById('vipRoomContainer');
       vipContainer.innerHTML = '';
 
       for (let i = 1; i <= 10; i++) {
-        const rate = (97.0 + Math.random() * 2.8).toFixed(1);
+        let roomNum = getRandomRoomNumber();
+        while (usedRooms.has(roomNum)) {
+          roomNum = getRandomRoomNumber();
+        }
+        usedRooms.add(roomNum);
+
+        const rate = (96.5 + Math.random() * 3.3).toFixed(1);
         const tag = vipTags[i - 1];
-        const realRoomNumber = '#' + String((i * 19 + 7) % 240 + 1).padStart(3, '0') + ' 號房';
 
         const card = document.createElement('div');
         card.className = 'bg-black/80 border border-neon-purple/40 rounded-xl p-3.5 hover-cyber relative overflow-hidden shadow-md flex flex-col justify-between';
@@ -844,7 +807,7 @@
                 <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/40 font-bold">
                   VIP ${i} · ${tag}
                 </span>
-                <div class="text-xl font-black text-white mt-1.5 font-mono">${realRoomNumber}</div>
+                <div class="text-xl font-black text-white mt-1.5 font-mono">${roomNum}</div>
               </div>
               <div class="text-right">
                 <div class="text-[10px] text-gray-400">爆分率</div>
@@ -863,7 +826,7 @@
                 <span class="text-[9px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/40 font-bold">
                   VIP ${i} · ${tag}
                 </span>
-                <div class="text-xl font-black text-white mt-1.5 font-mono">#*** 號房</div>
+                <div class="text-xl font-black text-white mt-1.5 font-mono">#**** 號房</div>
               </div>
               <div class="text-right">
                 <div class="text-[10px] text-gray-400">爆分率</div>
@@ -871,7 +834,7 @@
               </div>
             </div>
             <div class="absolute inset-0 bg-black/60 flex items-center justify-center p-2 text-center backdrop-blur-[1px]">
-              <button onclick="openVipModal('${realRoomNumber}', '${rate}%')" class="bg-gradient-to-r from-neon-purple to-neon-pink hover:brightness-125 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-lg border border-purple-300 transition">
+              <button onclick="openVipModal('${roomNum}', '${rate}%')" class="bg-gradient-to-r from-neon-purple to-neon-pink hover:brightness-125 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow-lg border border-purple-300 transition">
                 <i class="fa-solid fa-lock mr-1"></i> 點擊領碼解鎖
               </button>
             </div>
@@ -891,7 +854,7 @@
       document.getElementById('vipModal').classList.add('hidden');
     }
 
-    // 戰報卡圖片生成
+    // 9. 戰報卡圖片生成 (包含動態 4 位數房號)
     function generateCardCanvas() {
       const modal = document.getElementById('cardModal');
       const c = document.getElementById('reportCanvas');
@@ -961,7 +924,7 @@
       ctx.textAlign = 'center';
       ctx.fillStyle = '#888888';
       ctx.font = '16px Orbitron';
-      ctx.fillText('SETH ENGINE PROTOCOL V3.5', 270, 830);
+      ctx.fillText('SETH ENGINE PROTOCOL V3.6', 270, 830);
       ctx.fillText('VERIFIED BY BOSS NIU SYSTEM', 270, 860);
 
       modal.classList.remove('hidden');
