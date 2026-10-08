@@ -10,30 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
-    <!-- HTML2Canvas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <!-- Firebase SDK (Modular) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // Firebase 雲端資料庫配置 (預設共用資料庫)
-        const firebaseConfig = {
-            apiKey: "AIzaSyB-DEFAULT_DEMO_KEY",
-            authDomain: "niulaoda-passcode.firebaseapp.com",
-            projectId: "niulaoda-passcode",
-            storageBucket: "niulaoda-passcode.appspot.com",
-            messagingSenderId: "100000000000",
-            appId: "1:100000000000:web:niulaoda"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        window.db = db;
-        window.firestoreTools = { collection, onSnapshot, setDoc, doc, deleteDoc };
-    </script>
 
     <script>
         tailwind.config = {
@@ -91,9 +67,6 @@
             background: #2a1228;
             border-radius: 3px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ff0055;
-        }
 
         .modal-bg {
             background: rgba(5, 2, 5, 0.88);
@@ -110,10 +83,9 @@
 </head>
 <body class="relative min-h-screen pb-12 overflow-x-hidden">
 
-    <!-- 頂部 Header (已隱藏管理員登入按鈕) -->
+    <!-- 頂部 Header (無管理員登入按鈕) -->
     <header class="w-full border-b border-cyber-border/40 bg-cyber-bg/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-            <!-- 品牌標頭 -->
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyber-pink to-cyber-purple flex items-center justify-center font-bold text-lg shadow-lg shadow-cyber-pink/30">
                     <i class="fa-solid fa-chess-king text-white"></i>
@@ -131,22 +103,16 @@
                 </div>
             </div>
 
-            <!-- 頂部數據狀態欄 -->
             <div class="hidden md:flex items-center space-x-6 text-xs text-gray-300 font-orbitron">
                 <div class="flex items-center space-x-2">
                     <span class="inline-block w-2 h-2 rounded-full bg-cyber-pink animate-ping"></span>
                     <span class="text-gray-400">API 延遲:</span>
-                    <span class="text-cyber-green font-bold">9ms</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-shield-halved text-cyber-purple"></i>
-                    <span class="text-gray-400">防護等級:</span>
-                    <span class="text-cyber-cyan font-bold">動態加密全開</span>
+                    <span class="text-cyber-green font-bold">8ms</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-users text-pink-400"></i>
                     <span class="text-gray-400">在線人數:</span>
-                    <span class="text-white font-bold">3,426 人</span>
+                    <span class="text-white font-bold">3,892 人</span>
                 </div>
                 <div class="flex items-center space-x-2 bg-cyber-card/80 px-3 py-1.5 rounded-lg border border-cyber-border">
                     <i class="fa-solid fa-arrows-rotate text-cyber-pink animate-spin"></i>
@@ -155,7 +121,6 @@
                 </div>
             </div>
 
-            <!-- 右側功能鈕 (僅留 LINE 官方客服) -->
             <div class="flex items-center space-x-3">
                 <a href="https://line.me" target="_blank" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5 shadow-md shadow-emerald-900/40">
                     <i class="fa-brands fa-line text-base"></i>
@@ -168,23 +133,16 @@
     <!-- 主要內容區 -->
     <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- 左側：本金戰術與風控試算卡片 -->
+        <!-- 左側：試算卡片 -->
         <section class="lg:col-span-5 bg-cyber-card rounded-2xl p-5 border border-cyber-border shadow-xl flex flex-col justify-between relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-cyber-pink/5 rounded-full blur-2xl pointer-events-none"></div>
-
             <div>
-                <!-- 卡片標頭 -->
                 <div class="flex items-center justify-between border-b border-cyber-border/60 pb-3 mb-5">
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-calculator text-cyber-pink text-lg"></i>
                         <h2 class="font-bold text-lg text-white tracking-wide">本金戰術與風控試算</h2>
                     </div>
-                    <span class="text-[10px] font-orbitron bg-cyber-purple/20 text-cyber-purple px-2 py-0.5 rounded border border-cyber-purple/30 font-semibold">
-                        AI ENGINE
-                    </span>
                 </div>
 
-                <!-- 輸入試算區 -->
                 <div class="space-y-4">
                     <div>
                         <label class="block text-xs text-gray-400 mb-1 font-medium">請輸入您的預算本金 (分/元)</label>
@@ -195,460 +153,135 @@
                         </div>
                     </div>
 
-                    <!-- 快速填寫按鈕 -->
                     <div class="grid grid-cols-4 gap-2">
-                        <button onclick="setCapital(1000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 hover:text-white border border-cyber-border rounded-lg text-xs font-orbitron transition">1,000</button>
-                        <button onclick="setCapital(5000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 hover:text-white border border-cyber-border rounded-lg text-xs font-orbitron transition">5,000</button>
-                        <button onclick="setCapital(10000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 hover:text-white border border-cyber-border rounded-lg text-xs font-orbitron transition">10,000</button>
-                        <button onclick="setCapital(30000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 hover:text-white border border-cyber-border rounded-lg text-xs font-orbitron transition">30,000</button>
+                        <button onclick="setCapital(1000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 border border-cyber-border rounded-lg text-xs font-orbitron transition">1,000</button>
+                        <button onclick="setCapital(5000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 border border-cyber-border rounded-lg text-xs font-orbitron transition">5,000</button>
+                        <button onclick="setCapital(10000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 border border-cyber-border rounded-lg text-xs font-orbitron transition">10,000</button>
+                        <button onclick="setCapital(30000)" class="py-1.5 bg-black/40 hover:bg-cyber-pink/20 text-gray-300 border border-cyber-border rounded-lg text-xs font-orbitron transition">30,000</button>
                     </div>
 
-                    <!-- 試算結果顯示區 -->
                     <div class="bg-black/50 rounded-xl p-4 border border-cyber-border/80 space-y-3 mt-4">
                         <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-400 flex items-center gap-1.5">
-                                <i class="fa-solid fa-coins text-cyber-pink text-xs"></i> 推薦平打單注
-                            </span>
+                            <span class="text-gray-400 flex items-center gap-1.5"><i class="fa-solid fa-coins text-cyber-pink text-xs"></i> 推薦平打單注</span>
                             <span id="singleBet" class="font-orbitron font-black text-cyber-pink text-xl">24 分</span>
                         </div>
                         <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-400 flex items-center gap-1.5">
-                                <i class="fa-solid fa-shield-virus text-cyber-green text-xs"></i> 預計防禦轉數
-                            </span>
+                            <span class="text-gray-400 flex items-center gap-1.5"><i class="fa-solid fa-shield-virus text-cyber-green text-xs"></i> 預計防禦轉數</span>
                             <span id="defenseRounds" class="font-orbitron font-bold text-cyber-green text-lg">208 轉</span>
                         </div>
                         <div class="flex justify-between items-center text-sm pt-2 border-t border-cyber-border/40">
-                            <span class="text-gray-400 flex items-center gap-1.5">
-                                <i class="fa-solid fa-sliders text-cyber-purple text-xs"></i> 建議進攻打法
-                            </span>
-                            <span id="attackStrategy" class="text-xs font-bold bg-cyber-purple/20 text-purple-200 px-2.5 py-1 rounded-full border border-cyber-purple/40">
-                                進退有度 • 買 Buy 試探
-                            </span>
+                            <span class="text-gray-400 flex items-center gap-1.5"><i class="fa-solid fa-sliders text-cyber-purple text-xs"></i> 建議進攻打法</span>
+                            <span id="attackStrategy" class="text-xs font-bold bg-cyber-purple/20 text-purple-200 px-2.5 py-1 rounded-full border border-cyber-purple/40">進退有度 • 買 Buy 試探</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 計算按鈕 (5分鐘連動冷卻) -->
-            <button id="calcBtn" onclick="triggerCooldownAction('calc')" class="w-full mt-6 py-3.5 bg-gradient-to-r from-cyber-pink to-cyber-purple hover:from-pink-600 hover:to-purple-700 text-white font-black text-base rounded-xl shadow-lg shadow-cyber-pink/30 transition transform active:scale-95 flex items-center justify-center space-x-2">
+            <button id="calcBtn" onclick="triggerCooldownAction('calc')" class="w-full mt-6 py-3.5 bg-gradient-to-r from-cyber-pink to-cyber-purple text-white font-black text-base rounded-xl shadow-lg shadow-cyber-pink/30 transition transform active:scale-95 flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-calculator"></i>
                 <span id="calcBtnText">計算最適打法</span>
             </button>
         </section>
 
-
-        <!-- 右側：系統推薦勝率房號面板 -->
+        <!-- 右側：房號面板 -->
         <section class="lg:col-span-7 bg-cyber-card rounded-2xl p-5 border border-cyber-border shadow-xl space-y-5">
             <div class="flex items-center justify-between border-b border-cyber-border/60 pb-3">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-fire text-cyber-pink text-lg"></i>
-                    <h2 class="font-bold text-lg text-white">系統推薦勝率房號 <span class="text-xs text-gray-400 font-normal">(主推 + 10間 VIP)</span></h2>
+                    <h2 class="font-bold text-lg text-white">系統推薦勝率房號</h2>
                 </div>
-                
-                <div class="flex items-center space-x-2">
-                    <!-- 手動刷新按鈕 (5分鐘連動冷卻) -->
-                    <button id="manualRefreshBtn" onclick="triggerCooldownAction('refresh')" class="text-xs bg-cyber-purple/20 hover:bg-cyber-purple/40 text-purple-200 border border-cyber-purple/50 px-3 py-1.5 rounded-lg font-bold transition flex items-center space-x-1">
-                        <i class="fa-solid fa-arrows-rotate text-xs" id="refreshIcon"></i>
-                        <span id="refreshBtnText">手動刷新</span>
-                    </button>
-                    <span class="text-[10px] font-orbitron bg-cyber-green/20 text-cyber-green px-2 py-1 rounded font-bold border border-cyber-green/30">
-                        LIVE
-                    </span>
-                </div>
+                <button id="manualRefreshBtn" onclick="triggerCooldownAction('refresh')" class="text-xs bg-cyber-purple/20 hover:bg-cyber-purple/40 text-purple-200 border border-cyber-purple/50 px-3 py-1.5 rounded-lg font-bold transition flex items-center space-x-1">
+                    <i class="fa-solid fa-arrows-rotate text-xs" id="refreshIcon"></i>
+                    <span id="refreshBtnText">手動刷新</span>
+                </button>
             </div>
 
-            <!-- 主推爆分帝王房 -->
-            <div id="kingRoomCard" class="relative bg-gradient-to-r from-pink-950/40 via-purple-950/20 to-black/60 rounded-xl p-4 border-2 border-cyber-pink/80 shadow-lg shadow-cyber-pink/20 overflow-hidden">
-                <div class="absolute -right-6 -bottom-6 text-cyber-pink/10 text-8xl font-black font-orbitron pointer-events-none select-none">KING</div>
-                
+            <!-- 首選帝王房 -->
+            <div class="relative bg-gradient-to-r from-pink-950/40 via-purple-950/20 to-black/60 rounded-xl p-4 border-2 border-cyber-pink/80 shadow-lg">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold text-white bg-cyber-pink px-2.5 py-0.5 rounded-full uppercase tracking-wider font-orbitron flex items-center gap-1">
+                    <span class="text-xs font-bold text-white bg-cyber-pink px-2.5 py-0.5 rounded-full uppercase font-orbitron flex items-center gap-1">
                         <i class="fa-solid fa-crown text-yellow-300"></i> 首選勝率帝王房
                     </span>
-                    <span class="text-xs text-gray-400 font-orbitron">爆分預測指數</span>
                 </div>
-
                 <div class="flex items-baseline justify-between mt-1">
                     <div>
-                        <div class="text-3xl font-black font-orbitron text-white tracking-widest flex items-center gap-2">
-                            <span id="kingRoomNo" class="text-cyber-pink">#1418</span>
-                            <span class="text-lg font-normal text-gray-300">號房</span>
-                        </div>
-                        <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-bolt text-yellow-400 text-xs"></i>
-                            <span id="kingRoomSignal">高倍數訊號號碼極強 (即時聯網監控)</span>
-                        </p>
-                    </div>
-                    <div class="text-right">
-                        <div id="kingRoomWinRate" class="text-3xl font-black font-orbitron text-cyber-green drop-shadow-[0_0_10px_rgba(0,255,136,0.5)]">
-                            98.4%
+                        <div class="text-3xl font-black font-orbitron text-white tracking-widest">
+                            <span id="kingRoomNo" class="text-cyber-pink">#1418</span> <span class="text-lg font-normal text-gray-300">號房</span>
                         </div>
                     </div>
-                </div>
-
-                <div class="mt-3 pt-2 border-t border-cyber-pink/20 flex justify-end">
-                    <button onclick="copyRoomNo('kingRoomNo')" class="text-xs bg-cyber-pink/20 hover:bg-cyber-pink text-pink-200 hover:text-white px-3 py-1 rounded-md font-bold transition flex items-center gap-1 border border-cyber-pink/40">
-                        <i class="fa-regular fa-copy"></i> 前往機台 →
-                    </button>
+                    <div id="kingRoomWinRate" class="text-3xl font-black font-orbitron text-cyber-green">98.4%</div>
                 </div>
             </div>
 
-            <!-- VIP 獨家爆房池 (#0001~#4100 隨機監控) -->
-            <div class="space-y-2">
-                <div class="flex items-center justify-between text-xs text-gray-400 font-orbitron px-1">
-                    <span class="flex items-center gap-1"><i class="fa-solid fa-gem text-cyber-purple"></i> VIP 獨家爆房池 (#0001~#4100 隨機監控)</span>
-                    <span>定時輪播更新 ↓</span>
-                </div>
-
-                <div id="vipRoomGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-1">
-                    <!-- 由 JavaScript 動態生成 10 個 VIP 房號卡片 -->
-                </div>
+            <!-- VIP 卡池 -->
+            <div id="vipRoomGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[320px] overflow-y-auto pr-1">
             </div>
-
-            <!-- 一鍵生成戰報 -->
-            <button onclick="generateReportCard()" class="w-full py-2.5 bg-black/60 hover:bg-cyber-purple/30 text-purple-200 border border-cyber-purple/50 rounded-xl font-bold text-xs tracking-wider transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-image text-cyber-pink"></i>
-                <span>一鍵生成 『戰神幸運戰報』 圖片</span>
-            </button>
         </section>
 
     </main>
 
-    <!-- 頁尾宣告 -->
-    <footer class="mt-12 text-center text-xs text-gray-600 font-orbitron">
-        <p>© 2026 牛老大專屬 PROTOCOL. 保留一切權利。</p>
-    </footer>
-
-
-    <!-- ==================== 彈出視窗模組 (MODALS) ==================== -->
-
-    <!-- 1. 密碼驗證 / 免費試用入口 Modal -->
-    <div id="authModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-cyber-card border-2 border-cyber-pink rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-5">
+    <!-- 驗證 / 免費試用彈窗 -->
+    <div id="authModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+        <div class="bg-cyber-card border-2 border-cyber-pink rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="text-center space-y-2">
                 <div class="w-12 h-12 bg-cyber-pink/20 rounded-full flex items-center justify-center mx-auto border border-cyber-pink text-cyber-pink text-xl">
                     <i class="fa-solid fa-lock"></i>
                 </div>
-                <h3 class="text-xl font-bold text-white tracking-wide">牛老大 VIP 終端存取驗證</h3>
-                <p class="text-xs text-gray-400">請輸入管理員發行之有效通行密碼，或使用免費試用</p>
+                <h3 class="text-xl font-bold text-white">牛老大 VIP 終端存取驗證</h3>
+                <p class="text-xs text-gray-400">請輸入有效通行密碼或使用免費試用</p>
             </div>
 
             <div class="space-y-3">
-                <input type="text" id="passcodeInput" placeholder="輸入通行密碼 (例如: SETH2026)" 
-                    class="w-full bg-black/80 border border-cyber-border rounded-xl px-4 py-3 text-center text-lg font-orbitron font-bold text-white focus:outline-none focus:border-cyber-pink transition tracking-widest uppercase">
+                <input type="text" id="passcodeInput" placeholder="輸入通行密碼 (如: SETH2026)" 
+                    class="w-full bg-black/80 border border-cyber-border rounded-xl px-4 py-3 text-center text-lg font-orbitron font-bold text-white focus:outline-none focus:border-cyber-pink transition uppercase">
                 
                 <p id="authErrorMsg" class="text-xs text-cyber-pink text-center font-bold hidden">
-                    <i class="fa-solid fa-triangle-exclamation"></i> 通行密碼錯誤或已過期，請重新輸入！
+                    <i class="fa-solid fa-triangle-exclamation"></i> 通行密碼無效，請重新輸入！
                 </p>
 
-                <button onclick="verifyPasscode()" class="w-full py-3 bg-cyber-pink hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-cyber-pink/30 transition font-orbitron">
+                <button onclick="verifyPasscode()" class="w-full py-3 bg-cyber-pink hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg transition font-orbitron">
                     驗證並進入 VIP 系統 →
                 </button>
 
-                <!-- 恢復：免費試用體驗區 -->
-                <div class="pt-2 border-t border-cyber-border/60">
+                <!-- 免費試用區 -->
+                <div class="pt-3 border-t border-cyber-border/60">
                     <button onclick="startFreeTrial()" class="w-full py-2.5 bg-cyber-purple/30 hover:bg-cyber-purple/50 text-purple-200 border border-cyber-purple/60 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-gift text-cyber-pink"></i>
                         <span>免費體驗 / 試用模式進入</span>
                     </button>
-                    <p class="text-[10px] text-gray-500 text-center mt-1">試用模式提供基礎選房數據，解鎖完整 10 間 VIP 請輸入發行密碼</p>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <!-- 2. 管理員控制台 (發行密碼管理) Modal (隱藏啟動) -->
-    <div id="adminControlModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-cyber-card border-2 border-cyber-pink/80 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeModal('adminControlModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="flex items-center space-x-3 border-b border-cyber-border/60 pb-3">
-                <div class="w-10 h-10 rounded-xl bg-cyber-pink/20 border border-cyber-pink flex items-center justify-center text-cyber-pink text-lg">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-white">管理員發行控制台</h3>
-                    <p class="text-xs text-gray-400 font-orbitron">ADMIN: aimincvv168 • CLOUD SYNC ONLINE</p>
-                </div>
-            </div>
-
-            <!-- 發行新密碼區 -->
-            <div class="bg-black/40 p-4 rounded-xl border border-cyber-border/80 space-y-3">
-                <h4 class="text-xs font-bold text-gray-300 tracking-wider">新增動態時效通行密碼 (跨裝置/跨瀏覽器即時同步)</h4>
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="newPasscodeInput" placeholder="設定密碼 (如: SETH2026)" 
-                        class="flex-1 bg-black border border-cyber-border rounded-lg px-3 py-2 text-sm text-white font-orbitron uppercase focus:outline-none focus:border-cyber-pink">
-                    <select id="passcodeDuration" class="bg-black border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300 font-orbitron">
-                        <option value="1">1 小時</option>
-                        <option value="6">6 小時</option>
-                        <option value="12">12 小時</option>
-                        <option value="24" selected>24 小時</option>
-                        <option value="72">3 天 (72小時)</option>
-                    </select>
-                    <button onclick="createPasscode()" class="bg-cyber-pink hover:bg-pink-600 text-white px-4 py-2 rounded-lg text-sm font-bold font-orbitron transition whitespace-nowrap">
-                        發行密碼
-                    </button>
-                </div>
-            </div>
-
-            <!-- 已發行密碼清單 -->
-            <div class="space-y-2">
-                <h4 class="text-xs font-bold text-gray-400 flex items-center justify-between">
-                    <span>已發行密碼清單 (雲端即時同步中)</span>
-                    <span id="passcodeCount" class="text-cyber-pink font-orbitron">0 個項目</span>
-                </h4>
-
-                <div id="passcodeList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    <!-- 動態渲染密碼清單 -->
-                </div>
-            </div>
-
-            <div class="pt-2">
-                <button onclick="enterMainSystemAsAdmin()" class="w-full py-2.5 bg-gradient-to-r from-cyber-pink to-cyber-purple text-white font-bold rounded-xl text-sm transition">
-                    進入主選房系統 (管理者權限) →
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- JavaScript 邏輯控制區 -->
     <script>
-        const ADMIN_MASTER_KEY = "aimincvv168"; // 管理員主密碼
-        const COOLDOWN_TIME = 300; // 冷卻時間：5 分鐘 (300 秒)
-
-        let isUnlocked = false;
-        let isFreeTrial = false;
-        let cooldownTimer = null;
+        // 通用跨裝置授權密碼庫（任何手機/電腦輸入這些都能成功登入）
+        const VALID_PASSCODES = ["SETH2026", "NIU888", "VIP999", "AIMINCVV168", "8888"];
+        const COOLDOWN_TIME = 300;
         let currentCooldownSeconds = 0;
+        let cooldownTimer = null;
 
-        // 全域動態同步通行碼記憶體
-        let cloudPasscodes = {};
-
-        // 初始化
         window.addEventListener('DOMContentLoaded', () => {
             initVipRoomGrid();
             checkAuthOnStart();
-            initCloudSync();
         });
 
-        // 雲端跨裝置即時同步機制 (Firestore Realtime)
-        function initCloudSync() {
-            const checkFirebase = setInterval(() => {
-                if (window.db && window.firestoreTools) {
-                    clearInterval(checkFirebase);
-                    const { collection, onSnapshot } = window.firestoreTools;
-                    
-                    // 即時監聽雲端資料庫「passcodes」集合
-                    onSnapshot(collection(window.db, "passcodes"), (snapshot) => {
-                        cloudPasscodes = {};
-                        snapshot.forEach((doc) => {
-                            cloudPasscodes[doc.id] = doc.data();
-                        });
-                        renderAdminPasscodeList();
-                    }, (error) => {
-                        console.log("Firestore 模擬監聽啟動，開啟本地動態儲存");
-                    });
-                }
-            }, 300);
-        }
-
         function checkAuthOnStart() {
-            const unlockedState = sessionStorage.getItem('牛老大_unlocked');
-            const trialState = sessionStorage.getItem('牛老大_freetrial');
-
-            if (unlockedState === 'true') {
-                isUnlocked = true;
-            } else if (trialState === 'true') {
-                isFreeTrial = true;
+            const unlocked = sessionStorage.getItem('牛老大_unlocked');
+            const trial = sessionStorage.getItem('牛老大_freetrial');
+            if (unlocked === 'true') {
+                closeModal('authModal');
+            } else if (trial === 'true') {
                 setTrialUI();
-            } else {
-                openModal('authModal');
+                closeModal('authModal');
             }
         }
 
-        // ==================== 5分鐘連動冷卻控制 ====================
-        function triggerCooldownAction(source) {
-            if (currentCooldownSeconds > 0) return;
-
-            if (source === 'calc') {
-                calculateStrategy();
-            } else if (source === 'refresh') {
-                refreshAllRooms();
-            }
-
-            startCooldown(COOLDOWN_TIME);
-        }
-
-        function startCooldown(seconds) {
-            currentCooldownSeconds = seconds;
-            
-            const calcBtn = document.getElementById('calcBtn');
-            const calcText = document.getElementById('calcBtnText');
-            const refreshBtn = document.getElementById('manualRefreshBtn');
-            const refreshText = document.getElementById('refreshBtnText');
-            const refreshIcon = document.getElementById('refreshIcon');
-
-            calcBtn.classList.add('btn-disabled');
-            refreshBtn.classList.add('btn-disabled');
-            refreshIcon.classList.add('animate-spin');
-
-            if (cooldownTimer) clearInterval(cooldownTimer);
-
-            updateCooldownUI();
-
-            cooldownTimer = setInterval(() => {
-                currentCooldownSeconds--;
-
-                if (currentCooldownSeconds <= 0) {
-                    clearInterval(cooldownTimer);
-                    currentCooldownSeconds = 0;
-
-                    calcBtn.classList.remove('btn-disabled');
-                    refreshBtn.classList.remove('btn-disabled');
-                    refreshIcon.classList.remove('animate-spin');
-
-                    calcText.innerText = "計算最適打法";
-                    refreshText.innerText = "手動刷新";
-                } else {
-                    updateCooldownUI();
-                }
-            }, 1000);
-        }
-
-        function updateCooldownUI() {
-            const mins = String(Math.floor(currentCooldownSeconds / 60)).padStart(2, '0');
-            const secs = String(currentCooldownSeconds % 60).padStart(2, '0');
-            const timeStr = `冷卻中 (${mins}:${secs})`;
-
-            document.getElementById('calcBtnText').innerText = timeStr;
-            document.getElementById('refreshBtnText').innerText = timeStr;
-            document.getElementById('headerCountdown').innerText = `${mins}:${secs}`;
-        }
-
-        // ==================== 試算與房號 ====================
-        function setCapital(amount) {
-            document.getElementById('capitalInput').value = amount;
-            calculateStrategy();
-        }
-
-        function calculateStrategy() {
-            const capital = parseFloat(document.getElementById('capitalInput').value) || 0;
-            let singleBet = Math.max(1, Math.round(capital * 0.0048));
-            let rounds = Math.floor(capital / (singleBet || 1));
-
-            let strategy = "進退有度 • 買 Buy 試探";
-            if (capital < 3000) {
-                strategy = "保守防禦 • 平打積累";
-            } else if (capital >= 10000 && capital < 30000) {
-                strategy = "穩健進攻 • 階梯式加注";
-            } else if (capital >= 30000) {
-                strategy = "帝王爆發 • 大戶爆分打法";
-            }
-
-            document.getElementById('singleBet').innerText = `${singleBet} 分`;
-            document.getElementById('defenseRounds').innerText = `${rounds} 轉`;
-            document.getElementById('attackStrategy').innerText = strategy;
-        }
-
-        function getRandomRoomNo() {
-            const num = Math.floor(Math.random() * 4100) + 1;
-            return '#' + String(num).padStart(4, '0');
-        }
-
-        function refreshAllRooms() {
-            document.getElementById('kingRoomNo').innerText = getRandomRoomNo();
-            document.getElementById('kingRoomWinRate').innerText = (96.5 + Math.random() * 3.3).toFixed(1) + '%';
-            initVipRoomGrid();
-        }
-
-        function initVipRoomGrid() {
-            const grid = document.getElementById('vipRoomGrid');
-            grid.innerHTML = '';
-
-            const vipLabels = [
-                "累積咬度爆滿", "連開大黃池", "高額倍率訊號", "大戶特選卡池",
-                "黃金週期熱卡", "高吐分回報", "極速進入免費", "爆發訊號極強",
-                "暗池能量注入", "歷史高爆分房"
-            ];
-
-            for (let i = 1; i <= 10; i++) {
-                const roomNo = getRandomRoomNo();
-                const winRate = (95.0 + Math.random() * 4.8).toFixed(1);
-                const tag = vipLabels[i - 1];
-
-                const card = document.createElement('div');
-                card.className = "bg-black/50 border border-cyber-border/80 hover:border-cyber-pink/50 rounded-xl p-3 transition flex items-center justify-between";
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] bg-cyber-purple/20 text-purple-300 border border-cyber-purple/40 px-1.5 py-0.2 rounded font-orbitron">
-                                VIP ${i} • ${tag}
-                            </span>
-                        </div>
-                        <div class="text-lg font-black font-orbitron text-white mt-1">
-                            ${roomNo} <span class="text-xs font-normal text-gray-400">號房</span>
-                        </div>
-                        <div class="text-[10px] text-gray-500 mt-0.5">訊號: 穩定輸出</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-xs text-gray-400">爆分率</div>
-                        <div class="text-lg font-black font-orbitron text-cyber-green">${winRate}%</div>
-                        <button onclick="copyRoomText('${roomNo}')" class="text-[10px] text-cyber-pink hover:underline font-orbitron mt-1 block">
-                            前往機台 →
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
-            }
-        }
-
-        function copyRoomNo(elementId) {
-            const text = document.getElementById(elementId).innerText;
-            copyRoomText(text);
-        }
-
-        function copyRoomText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`已複製房號 ${text}！準備前往戰神賽特機台。`);
-            }).catch(() => {
-                alert(`房號：${text}`);
-            });
-        }
-
-        // ==================== 驗證與發行密碼 (跨裝置同步) ====================
         function verifyPasscode() {
             const input = document.getElementById('passcodeInput').value.trim().toUpperCase();
-
-            // 檢查管理員密碼
-            if (input === ADMIN_MASTER_KEY.toUpperCase()) {
-                isUnlocked = true;
-                sessionStorage.setItem('牛老大_unlocked', 'true');
-                closeModal('authModal');
-                openAdminModal();
-                return;
-            }
-
-            // 檢查雲端/本地發行的通行碼
-            const now = Date.now();
-            let matched = false;
-
-            // 1. 檢查雲端同步的通行碼
-            if (cloudPasscodes[input] && cloudPasscodes[input].expireTime > now) {
-                matched = true;
-            }
-
-            // 2. 本地發行密碼備用備援檢查
-            const localSaved = JSON.parse(localStorage.getItem('niulaoda_cloud_passcodes') || '{}');
-            if (localSaved[input] && localSaved[input].expireTime > now) {
-                matched = true;
-            }
-
-            if (matched) {
-                isUnlocked = true;
+            
+            // 檢查是否符合授權密碼庫
+            if (VALID_PASSCODES.includes(input)) {
                 sessionStorage.setItem('牛老大_unlocked', 'true');
                 closeModal('authModal');
                 document.getElementById('authErrorMsg').classList.add('hidden');
@@ -659,7 +292,6 @@
         }
 
         function startFreeTrial() {
-            isFreeTrial = true;
             sessionStorage.setItem('牛老大_freetrial', 'true');
             setTrialUI();
             closeModal('authModal');
@@ -670,119 +302,77 @@
             document.getElementById('userStatusTag').className = "text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-orbitron font-semibold";
         }
 
-        function openAdminModal() {
-            openModal('adminControlModal');
-            renderAdminPasscodeList();
-        }
-
-        // 發行新密碼 (同步至雲端 + 本地全域)
-        async function createPasscode() {
-            const inputEl = document.getElementById('newPasscodeInput');
-            const code = inputEl.value.trim().toUpperCase();
-            const hours = parseInt(document.getElementById('passcodeDuration').value) || 24;
-
-            if (!code) {
-                alert("請輸入要設定的密碼！");
-                return;
-            }
-
-            const expireTime = Date.now() + (hours * 3600 * 1000);
-            const data = { code: code, expireTime: expireTime, createdAt: Date.now() };
-
-            // 寫入全域與 LocalStorage
-            cloudPasscodes[code] = data;
-            const localSaved = JSON.parse(localStorage.getItem('niulaoda_cloud_passcodes') || '{}');
-            localSaved[code] = data;
-            localStorage.setItem('niulaoda_cloud_passcodes', JSON.stringify(localSaved));
-
-            // 寫入 Firebase 雲端資料庫
-            if (window.db && window.firestoreTools) {
-                try {
-                    const { setDoc, doc } = window.firestoreTools;
-                    await setDoc(doc(window.db, "passcodes", code), data);
-                } catch (e) {
-                    console.log("寫入 Firebase 雲端中:", e);
-                }
-            }
-
-            inputEl.value = '';
-            renderAdminPasscodeList();
-            alert(`成功發行通行密碼：${code}！其他裝置輸入此密碼即可立刻登入。`);
-        }
-
-        async function deletePasscode(code) {
-            delete cloudPasscodes[code];
-            const localSaved = JSON.parse(localStorage.getItem('niulaoda_cloud_passcodes') || '{}');
-            delete localSaved[code];
-            localStorage.setItem('niulaoda_cloud_passcodes', JSON.stringify(localSaved));
-
-            if (window.db && window.firestoreTools) {
-                try {
-                    const { deleteDoc, doc } = window.firestoreTools;
-                    await deleteDoc(doc(window.db, "passcodes", code));
-                } catch (e) { console.log(e); }
-            }
-
-            renderAdminPasscodeList();
-        }
-
-        function renderAdminPasscodeList() {
-            const container = document.getElementById('passcodeList');
-            const countEl = document.getElementById('passcodeCount');
-            if (!container) return;
-
-            container.innerHTML = '';
-            const now = Date.now();
-            
-            // 合併顯示來源
-            const localSaved = JSON.parse(localStorage.getItem('niulaoda_cloud_passcodes') || '{}');
-            const allPasscodes = { ...localSaved, ...cloudPasscodes };
-
-            const validCodes = Object.values(allPasscodes).filter(item => item.expireTime > now);
-            countEl.innerText = `${validCodes.length} 個項目`;
-
-            if (validCodes.length === 0) {
-                container.innerHTML = `<div class="text-center py-4 text-xs text-gray-500 font-orbitron">目前尚未發行通行密碼，請於上方發行</div>`;
-                return;
-            }
-
-            validCodes.forEach(item => {
-                const dateStr = new Date(item.expireTime).toLocaleString();
-                const card = document.createElement('div');
-                card.className = "bg-black/60 border border-cyber-border rounded-lg p-2.5 flex items-center justify-between text-xs";
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-black font-orbitron text-white text-sm">${item.code}</span>
-                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] px-1.5 py-0.2 rounded">雲端同步中</span>
-                        </div>
-                        <div class="text-[10px] text-gray-400 font-orbitron mt-0.5">到期時間: ${dateStr}</div>
-                    </div>
-                    <button onclick="deletePasscode('${item.code}')" class="text-xs bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/50 px-2.5 py-1 rounded transition">
-                        刪除
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function enterMainSystemAsAdmin() {
-            isUnlocked = true;
-            sessionStorage.setItem('牛老大_unlocked', 'true');
-            closeModal('adminControlModal');
-            document.getElementById('userStatusTag').innerText = "管理者權限模式";
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
         }
 
-        function generateReportCard() {
-            alert("『戰神幸運戰報』生成完成！已為您截取當前最佳勝率帝王房與風控試算數據。");
+        function setCapital(amount) {
+            document.getElementById('capitalInput').value = amount;
+            calculateStrategy();
+        }
+
+        function calculateStrategy() {
+            const capital = parseFloat(document.getElementById('capitalInput').value) || 0;
+            let singleBet = Math.max(1, Math.round(capital * 0.0048));
+            let rounds = Math.floor(capital / (singleBet || 1));
+            document.getElementById('singleBet').innerText = `${singleBet} 分`;
+            document.getElementById('defenseRounds').innerText = `${rounds} 轉`;
+        }
+
+        function getRandomRoomNo() {
+            return '#' + String(Math.floor(Math.random() * 4100) + 1).padStart(4, '0');
+        }
+
+        function initVipRoomGrid() {
+            const grid = document.getElementById('vipRoomGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const card = document.createElement('div');
+                card.className = "bg-black/50 border border-cyber-border/80 rounded-xl p-3 flex items-center justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="text-xs text-cyber-purple font-bold">VIP ${i} 爆分房</div>
+                        <div class="text-lg font-black font-orbitron text-white">${getRandomRoomNo()}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-black font-orbitron text-cyber-green">${(95.0 + Math.random() * 4.8).toFixed(1)}%</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
+        function triggerCooldownAction(source) {
+            if (currentCooldownSeconds > 0) return;
+            if (source === 'calc') calculateStrategy();
+            if (source === 'refresh') {
+                document.getElementById('kingRoomNo').innerText = getRandomRoomNo();
+                initVipRoomGrid();
+            }
+            startCooldown(COOLDOWN_TIME);
+        }
+
+        function startCooldown(seconds) {
+            currentCooldownSeconds = seconds;
+            updateCooldownUI();
+            cooldownTimer = setInterval(() => {
+                currentCooldownSeconds--;
+                if (currentCooldownSeconds <= 0) {
+                    clearInterval(cooldownTimer);
+                    document.getElementById('calcBtnText').innerText = "計算最適打法";
+                    document.getElementById('refreshBtnText').innerText = "手動刷新";
+                } else {
+                    updateCooldownUI();
+                }
+            }, 1000);
+        }
+
+        function updateCooldownUI() {
+            const mins = String(Math.floor(currentCooldownSeconds / 60)).padStart(2, '0');
+            const secs = String(currentCooldownSeconds % 60).padStart(2, '0');
+            document.getElementById('calcBtnText').innerText = `冷卻中 (${mins}:${secs})`;
+            document.getElementById('refreshBtnText').innerText = `冷卻中 (${mins}:${secs})`;
+            document.getElementById('headerCountdown').innerText = `${mins}:${secs}`;
         }
     </script>
 </body>
