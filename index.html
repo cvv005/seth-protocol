@@ -82,7 +82,7 @@
 </head>
 <body class="relative min-h-screen pb-12 cyber-grid">
 
-    <!-- 背景粒子 Canvas -->
+    <!-- 背景 12 星座漂浮符號 Canvas -->
     <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
     <!-- 頂部 Header -->
@@ -225,7 +225,7 @@
 
     </main>
 
-    <!-- 驗證 Modal (高強度防護，取消任意放行機制) -->
+    <!-- 驗證 Modal -->
     <div id="authModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
         <div class="bg-cyber-card border-2 border-cyber-pink rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="text-center space-y-2">
@@ -305,12 +305,13 @@
         let cooldownTimer = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            initBgParticles();
+            initZodiacParticles();
             initVipRoomGrid();
             checkAuthOnStart();
         });
 
-        function initBgParticles() {
+        // 12 星座漂浮粒子動畫
+        function initZodiacParticles() {
             const canvas = document.getElementById('bgCanvas');
             const ctx = canvas.getContext('2d');
             let width = canvas.width = window.innerWidth;
@@ -321,30 +322,49 @@
                 height = canvas.height = window.innerHeight;
             });
 
-            const particles = Array.from({ length: 35 }, () => ({
+            // 12 星座 Unicode 符號
+            const zodiacSymbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+
+            const particles = Array.from({ length: 28 }, () => ({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                vx: (Math.random() - 0.5) * 0.6,
-                vy: (Math.random() - 0.5) * 0.6,
-                size: Math.random() * 2 + 1,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.floor(Math.random() * 12) + 16, // 字體大小 16px - 28px
+                symbol: zodiacSymbols[Math.floor(Math.random() * zodiacSymbols.length)],
+                alpha: Math.random() * 0.5 + 0.2, // 透明度 0.2 - 0.7
+                rotation: Math.random() * Math.PI * 2,
+                vRot: (Math.random() - 0.5) * 0.01,
                 color: Math.random() > 0.5 ? '#ff0055' : '#8a2be2'
             }));
 
             function animate() {
                 ctx.clearRect(0, 0, width, height);
+
                 particles.forEach(p => {
                     p.x += p.vx;
                     p.y += p.vy;
-                    if (p.x < 0 || p.x > width) p.vx *= -1;
-                    if (p.y < 0 || p.y > height) p.vy *= -1;
+                    p.rotation += p.vRot;
 
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    if (p.x < -30) p.x = width + 30;
+                    if (p.x > width + 30) p.x = -30;
+                    if (p.y < -30) p.y = height + 30;
+                    if (p.y > height + 30) p.y = -30;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation);
+                    ctx.font = `${p.size}px sans-serif`;
                     ctx.fillStyle = p.color;
-                    ctx.shadowBlur = 8;
+                    ctx.globalAlpha = p.alpha;
+                    ctx.shadowBlur = 12;
                     ctx.shadowColor = p.color;
-                    ctx.fill();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(p.symbol, 0, 0);
+                    ctx.restore();
                 });
+
                 requestAnimationFrame(animate);
             }
             animate();
@@ -361,26 +381,23 @@
             }
         }
 
-        // 時效動態算碼驗證（精準驗證隨機亂碼 + 時間戳記）
         function isValidPasscode(input) {
             if (input === ADMIN_KEY) return "ADMIN";
 
             try {
-                // 檢查是否為產生的動態格式 SETH-XXXX-XXXX
                 if (!input.startsWith("SETH-")) return false;
 
                 const parts = input.split("-");
                 if (parts.length !== 3) return false;
 
-                const hexTime = parseInt(parts[1], 16); // 發行時間戳記
-                const validHours = parseInt(parts[2].slice(0, 2), 10); // 有效小時數
+                const hexTime = parseInt(parts[1], 16);
+                const validHours = parseInt(parts[2].slice(0, 2), 10);
 
                 if (isNaN(hexTime) || isNaN(validHours)) return false;
 
                 const now = Math.floor(Date.now() / 1000);
                 const expireTime = hexTime + (validHours * 3600);
 
-                // 檢查是否未過期
                 if (now <= expireTime) {
                     return true;
                 }
@@ -408,25 +425,21 @@
             }
         }
 
-        // 隨機生成包含「時間戳記」與「亂碼簽名」的高強度密碼
         function generateRandomPasscode() {
             const hours = parseInt(document.getElementById('validHoursSelect').value, 10);
             const nowHex = Math.floor(Date.now() / 1000).toString(16).toUpperCase();
             
-            // 隨機亂碼 4 碼
             const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
             let randomStr = "";
             for (let i = 0; i < 4; i++) {
                 randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
             }
 
-            // 格式：SETH-[時間HEX]-[時數+隨機碼] (範例: SETH-66FA123-06A9)
             const hourPad = String(hours).padStart(2, '0');
             const passcode = `SETH-${nowHex}-${hourPad}${randomStr}`;
 
             document.getElementById('generatedCodeDisplay').innerText = passcode;
             
-            // 自動複製到剪貼簿
             navigator.clipboard.writeText(passcode);
             alert(`已生成高強度隨機通行碼：\n${passcode}\n\n(有效時間: ${hours} 小時，已複製到剪貼簿，任何手機電腦皆可登入)`);
         }
