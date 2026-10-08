@@ -54,11 +54,6 @@
                 linear-gradient(to bottom, rgba(255, 0, 85, 0.05) 1px, transparent 1px);
         }
 
-        .cyber-border {
-            border: 1px solid rgba(255, 0, 85, 0.3);
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.15);
-        }
-
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
         }
@@ -82,7 +77,7 @@
 </head>
 <body class="relative min-h-screen pb-12 cyber-grid">
 
-    <!-- 背景 12 星座漂浮符號 Canvas -->
+    <!-- 背景賽博幾何脈衝 Canvas -->
     <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
     <!-- 頂部 Header -->
@@ -257,19 +252,19 @@
         </div>
     </div>
 
-    <!-- 管理員控制台 Modal -->
+    <!-- 管理員控制台 Modal (新增已發行代碼 & 剩餘時間倒數) -->
     <div id="adminModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-cyber-card border-2 border-cyber-pink/80 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+        <div class="bg-cyber-card border-2 border-cyber-pink/80 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-cyber-border/60 pb-3">
                 <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-user-shield text-cyber-pink"></i> 管理員隨機密碼發行控制台
+                    <i class="fa-solid fa-user-shield text-cyber-pink"></i> 管理員密碼發行與即時監控台
                 </h3>
-                <button onclick="closeModal('adminModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="closeModal('adminModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
             <div class="bg-black/50 p-4 rounded-xl border border-cyber-border space-y-4">
                 <div>
-                    <label class="block text-xs text-gray-300 font-bold mb-2">1. 選擇密碼有效時間：</label>
+                    <label class="block text-xs text-gray-300 font-bold mb-2">1. 選擇新生成密碼的有效時間：</label>
                     <select id="validHoursSelect" class="w-full bg-black border border-cyber-border rounded-lg px-3 py-2 text-sm text-white font-orbitron focus:outline-none focus:border-cyber-pink">
                         <option value="1">1 小時有效</option>
                         <option value="6" selected>6 小時有效</option>
@@ -279,20 +274,28 @@
                     </select>
                 </div>
 
-                <button onclick="generateRandomPasscode()" class="w-full py-3 bg-gradient-to-r from-cyber-pink to-cyber-purple text-white font-black rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2">
+                <button onclick="generateRandomPasscode()" class="w-full py-3 bg-gradient-to-r from-cyber-pink to-cyber-purple text-white font-black rounded-xl text-sm transition shadow-lg flex items-center justify-center gap-2 active:scale-95">
                     <i class="fa-solid fa-dice text-base"></i>
-                    <span>🎲 一鍵隨機生成高強度通行密碼</span>
+                    <span>🎲 隨機生成新通行碼並加入監控列表</span>
                 </button>
             </div>
 
-            <div class="space-y-2">
-                <div class="text-xs font-bold text-gray-400">已生成的隨機通行碼 (自動複製，任何裝置皆可登入)：</div>
-                <div id="generatedCodeDisplay" class="bg-black/80 border border-cyber-pink/50 p-3 rounded-xl text-center font-orbitron text-cyber-green text-xl font-black tracking-widest min-h-[50px] flex items-center justify-center">
-                    尚未生成
+            <!-- 已生成代碼歷史紀錄與剩餘時間倒數 -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-cyber-pink"></i>
+                        <span>已發行通行碼列表與實時剩餘時間：</span>
+                    </div>
+                    <button onclick="clearPasscodeHistory()" class="text-[10px] text-gray-400 hover:text-cyber-pink transition">清空無效紀錄</button>
+                </div>
+
+                <div id="passcodeHistoryContainer" class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                    <!-- 動態渲染代碼卡片 -->
                 </div>
             </div>
 
-            <button onclick="enterAsAdmin()" class="w-full py-2.5 bg-black/60 hover:bg-black/90 text-gray-300 border border-cyber-border font-bold rounded-xl text-xs transition">
+            <button onclick="enterAsAdmin()" class="w-full py-2.5 bg-black/80 hover:bg-black text-gray-300 border border-cyber-border font-bold rounded-xl text-xs transition">
                 進入選房主系統 (管理員模式) →
             </button>
         </div>
@@ -303,15 +306,18 @@
         const COOLDOWN_TIME = 300;
         let currentCooldownSeconds = 0;
         let cooldownTimer = null;
+        let generatedCodesList = []; // 儲存發行過的代碼陣列
 
         window.addEventListener('DOMContentLoaded', () => {
-            initZodiacParticles();
+            initCyberHexParticles();
             initVipRoomGrid();
             checkAuthOnStart();
+            loadPasscodeHistory();
+            setInterval(updatePasscodesRemainingTime, 1000); // 每一秒更新所有密碼剩餘時間倒數
         });
 
-        // 12 星座漂浮粒子動畫
-        function initZodiacParticles() {
+        // 升級版背景：賽博幾何光帶與脈衝光點 (絕無 12 星座)
+        function initCyberHexParticles() {
             const canvas = document.getElementById('bgCanvas');
             const ctx = canvas.getContext('2d');
             let width = canvas.width = window.innerWidth;
@@ -322,47 +328,54 @@
                 height = canvas.height = window.innerHeight;
             });
 
-            // 12 星座 Unicode 符號
-            const zodiacSymbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
-
-            const particles = Array.from({ length: 28 }, () => ({
+            // 金屬質感的科技粒子與線條
+            const particles = Array.from({ length: 45 }, () => ({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                size: Math.floor(Math.random() * 12) + 16, // 字體大小 16px - 28px
-                symbol: zodiacSymbols[Math.floor(Math.random() * zodiacSymbols.length)],
-                alpha: Math.random() * 0.5 + 0.2, // 透明度 0.2 - 0.7
-                rotation: Math.random() * Math.PI * 2,
-                vRot: (Math.random() - 0.5) * 0.01,
-                color: Math.random() > 0.5 ? '#ff0055' : '#8a2be2'
+                size: Math.random() * 3 + 1,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8,
+                color: Math.random() > 0.4 ? '#ff0055' : (Math.random() > 0.5 ? '#8a2be2' : '#00ff88'),
+                alpha: Math.random() * 0.6 + 0.2
             }));
 
             function animate() {
                 ctx.clearRect(0, 0, width, height);
 
+                // 畫出連線幾何矩陣
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 130) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(255, 0, 85, ${0.12 * (1 - dist / 130)})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                // 畫出脈衝粒子點
                 particles.forEach(p => {
                     p.x += p.vx;
                     p.y += p.vy;
-                    p.rotation += p.vRot;
 
-                    if (p.x < -30) p.x = width + 30;
-                    if (p.x > width + 30) p.x = -30;
-                    if (p.y < -30) p.y = height + 30;
-                    if (p.y > height + 30) p.y = -30;
+                    if (p.x < 0 || p.x > width) p.vx *= -1;
+                    if (p.y < 0 || p.y > height) p.vy *= -1;
 
-                    ctx.save();
-                    ctx.translate(p.x, p.y);
-                    ctx.rotate(p.rotation);
-                    ctx.font = `${p.size}px sans-serif`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     ctx.fillStyle = p.color;
                     ctx.globalAlpha = p.alpha;
-                    ctx.shadowBlur = 12;
+                    ctx.shadowBlur = 10;
                     ctx.shadowColor = p.color;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(p.symbol, 0, 0);
-                    ctx.restore();
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
                 });
 
                 requestAnimationFrame(animate);
@@ -425,9 +438,11 @@
             }
         }
 
+        // 隨機生成通行碼，並寫入紀錄
         function generateRandomPasscode() {
             const hours = parseInt(document.getElementById('validHoursSelect').value, 10);
-            const nowHex = Math.floor(Date.now() / 1000).toString(16).toUpperCase();
+            const nowSec = Math.floor(Date.now() / 1000);
+            const nowHex = nowSec.toString(16).toUpperCase();
             
             const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
             let randomStr = "";
@@ -438,10 +453,122 @@
             const hourPad = String(hours).padStart(2, '0');
             const passcode = `SETH-${nowHex}-${hourPad}${randomStr}`;
 
-            document.getElementById('generatedCodeDisplay').innerText = passcode;
-            
+            const item = {
+                code: passcode,
+                createdSec: nowSec,
+                expireSec: nowSec + (hours * 3600),
+                hours: hours
+            };
+
+            generatedCodesList.unshift(item); // 最新發行的排在前面
+            savePasscodeHistory();
+            renderPasscodeHistoryUI();
+
             navigator.clipboard.writeText(passcode);
-            alert(`已生成高強度隨機通行碼：\n${passcode}\n\n(有效時間: ${hours} 小時，已複製到剪貼簿，任何手機電腦皆可登入)`);
+            alert(`✅ 已生成高強度通行碼：\n${passcode}\n\n(時效：${hours} 小時，已自動複製至剪貼簿)`);
+        }
+
+        function savePasscodeHistory() {
+            localStorage.setItem('牛老大_passcodes_history', JSON.stringify(generatedCodesList));
+        }
+
+        function loadPasscodeHistory() {
+            const saved = localStorage.getItem('牛老大_passcodes_history');
+            if (saved) {
+                try {
+                    generatedCodesList = JSON.parse(saved);
+                } catch (e) {
+                    generatedCodesList = [];
+                }
+            }
+            renderPasscodeHistoryUI();
+        }
+
+        function clearPasscodeHistory() {
+            generatedCodesList = generatedCodesList.filter(item => {
+                const now = Math.floor(Date.now() / 1000);
+                return now < item.expireSec;
+            });
+            savePasscodeHistory();
+            renderPasscodeHistoryUI();
+        }
+
+        // 渲染已發行代碼與時效卡片
+        function renderPasscodeHistoryUI() {
+            const container = document.getElementById('passcodeHistoryContainer');
+            if (!container) return;
+
+            if (generatedCodesList.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-xs text-gray-500 bg-black/30 rounded-xl border border-cyber-border/40">
+                        目前尚無已發行的通行碼，點擊上方按鈕立即生成
+                    </div>
+                `;
+                return;
+            }
+
+            const now = Math.floor(Date.now() / 1000);
+            let html = '';
+
+            generatedCodesList.forEach((item, index) => {
+                const remainSec = item.expireSec - now;
+                const isExpired = remainSec <= 0;
+
+                html += `
+                    <div class="bg-black/70 border ${isExpired ? 'border-red-900/60' : 'border-cyber-pink/40'} rounded-xl p-3 flex items-center justify-between text-xs font-orbitron">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-black text-white text-sm tracking-wider">${item.code}</span>
+                                <button onclick="copyToClipboard('${item.code}')" class="text-[10px] bg-cyber-purple/30 hover:bg-cyber-purple/60 text-purple-200 border border-cyber-purple/50 px-2 py-0.5 rounded transition">
+                                    <i class="fa-solid fa-copy"></i> 複製
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-400">
+                                總時效: ${item.hours} 小時
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            ${isExpired ? 
+                                `<span class="text-xs font-bold text-red-500 bg-red-950/40 px-2.5 py-1 rounded-md border border-red-800/40">已過期</span>` : 
+                                `<div class="text-cyber-green font-bold text-xs" id="remain-time-${index}">${formatRemainingTime(remainSec)}</div>
+                                 <div class="text-[9px] text-gray-500 mt-0.5">剩餘時間</div>`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 即時倒數算式
+        function updatePasscodesRemainingTime() {
+            if (generatedCodesList.length === 0) return;
+            const now = Math.floor(Date.now() / 1000);
+
+            generatedCodesList.forEach((item, index) => {
+                const el = document.getElementById(`remain-time-${index}`);
+                if (el) {
+                    const remainSec = item.expireSec - now;
+                    if (remainSec <= 0) {
+                        renderPasscodeHistoryUI(); // 重新整理狀態
+                    } else {
+                        el.innerText = formatRemainingTime(remainSec);
+                    }
+                }
+            });
+        }
+
+        function formatRemainingTime(totalSeconds) {
+            const hrs = Math.floor(totalSeconds / 3600);
+            const mins = Math.floor((totalSeconds % 3600) / 60);
+            const secs = totalSeconds % 60;
+            return `${String(hrs).padStart(2, '0')}時 ${String(mins).padStart(2, '0')}分 ${String(secs).padStart(2, '0')}秒`;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            alert(`已複製通行碼：${text}`);
         }
 
         function enterAsAdmin() {
@@ -461,7 +588,10 @@
             document.getElementById('userStatusTag').className = "text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-orbitron font-semibold";
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function openModal(id) { 
+            document.getElementById(id).classList.remove('hidden'); 
+            if (id === 'adminModal') renderPasscodeHistoryUI();
+        }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function setCapital(amount) {
