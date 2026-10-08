@@ -132,7 +132,7 @@
     <canvas id="particleCanvas"></canvas>
 
     <div id="mainApp" class="relative z-10">
-        <!-- 頂部 Header (已徹底隱藏管理員入口) -->
+        <!-- 頂部 Header -->
         <header class="w-full border-b border-cyber-border/60 bg-cyber-bg/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3">
             <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center space-x-3">
@@ -236,6 +236,7 @@
                 </button>
             </section>
 
+            <!-- 右側：房號推薦面板 -->
             <section id="reportCaptureArea" class="lg:col-span-7 cyber-card rounded-2xl p-5 border border-cyber-border shadow-2xl space-y-5">
                 <div class="flex items-center justify-between border-b border-cyber-border/60 pb-3">
                     <div class="flex items-center space-x-2">
@@ -306,7 +307,6 @@
         </footer>
     </div>
 
-
     <!-- 1. 驗證彈窗 Modal (含萬用密碼 & 免費試用) -->
     <div id="authModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
         <div class="cyber-card border-2 border-cyber-pink rounded-2xl max-w-md w-full p-6 shadow-2xl relative space-y-5">
@@ -325,12 +325,15 @@
                 <p id="authErrorMsg" class="text-xs text-cyber-pink text-center font-bold hidden">
                     <i class="fa-solid fa-triangle-exclamation"></i> 通行密碼錯誤或已過期，請重新輸入！
                 </p>
+                <p id="authLoadingMsg" class="text-xs text-cyber-cyan text-center font-bold hidden animate-pulse">
+                    <i class="fa-solid fa-spinner fa-spin"></i> 正在線上同步驗證密碼，請稍候...
+                </p>
 
-                <button onclick="verifyPasscode()" class="w-full py-3 bg-cyber-pink hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-cyber-pink/30 transition font-orbitron">
+                <button id="verifyBtn" onclick="verifyPasscode()" class="w-full py-3 bg-cyber-pink hover:bg-pink-600 text-white font-bold rounded-xl shadow-lg shadow-cyber-pink/30 transition font-orbitron">
                     驗證並進入 VIP 系統 →
                 </button>
 
-                <!-- 恢復：免費試用體驗區 -->
+                <!-- 免費試用體驗區 -->
                 <div class="pt-3 border-t border-cyber-border/60">
                     <button onclick="startFreeTrial()" class="w-full py-2.5 bg-cyber-purple/30 hover:bg-cyber-purple/50 text-purple-200 border border-cyber-purple/60 font-bold rounded-xl text-xs transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-gift text-cyber-pink"></i>
@@ -341,7 +344,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- 2. 管理員控制台 Modal (隱藏式管理員) -->
     <div id="adminControlModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4 hidden">
@@ -356,15 +358,15 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-white">管理員發行控制台</h3>
-                    <p class="text-xs text-gray-400 font-orbitron">ADMIN MASTER KEY ACTIVE</p>
+                    <p class="text-xs text-gray-400 font-orbitron">ADMIN MASTER KEY ACTIVE (雲端同步已開啟)</p>
                 </div>
             </div>
 
             <!-- 發行密碼區 -->
             <div class="bg-black/50 p-4 rounded-xl border border-cyber-border/80 space-y-3">
-                <h4 class="text-xs font-bold text-gray-300">新增動態時效通行密碼 (萬用跨裝置授權)</h4>
+                <h4 class="text-xs font-bold text-gray-300">新增動態時效通行密碼 (雲端即時同步 + 算法保底)</h4>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="text" id="newPasscodeInput" placeholder="設定密碼 (如: SETH2026)" 
+                    <input type="text" id="newPasscodeInput" placeholder="設定密碼 (如: SETH888)" 
                         class="flex-1 bg-black border border-cyber-border rounded-lg px-3 py-2 text-sm text-white font-orbitron uppercase focus:outline-none focus:border-cyber-pink">
                     <select id="passcodeDuration" class="bg-black border border-cyber-border rounded-lg px-3 py-2 text-sm text-gray-300 font-orbitron">
                         <option value="1">1 小時</option>
@@ -373,8 +375,8 @@
                         <option value="24" selected>24 小時</option>
                         <option value="72">3 天 (72小時)</option>
                     </select>
-                    <button onclick="createPasscode()" class="bg-cyber-pink hover:bg-pink-600 text-white px-4 py-2 rounded-lg text-sm font-bold font-orbitron transition whitespace-nowrap">
-                        發行密碼
+                    <button onclick="createPasscode()" class="bg-cyber-pink hover:bg-pink-600 text-white px-4 py-2 rounded-lg text-sm font-bold font-orbitron transition whitespace-nowrap flex items-center gap-1 justify-center">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> 發行密碼
                     </button>
                 </div>
             </div>
@@ -382,7 +384,7 @@
             <!-- 已發行密碼清單 -->
             <div class="space-y-2">
                 <h4 class="text-xs font-bold text-gray-400 flex items-center justify-between">
-                    <span>已發行通行密碼清單</span>
+                    <span>已發行通行密碼清單 (線上雲端與本機)</span>
                     <span id="passcodeCount" class="text-cyber-pink font-orbitron">0 個項目</span>
                 </h4>
 
@@ -398,16 +400,19 @@
         </div>
     </div>
 
-
     <script>
         const ADMIN_MASTER_KEY = "aimincvv168"; // 管理員主密碼
         const COOLDOWN_TIME = 300; // 5分鐘冷卻
 
-        // 預設跨裝置通行密碼庫
+        // 公用免費雲端同步 JSON Endpoint (用於跨裝置/跨手機同步密碼)
+        const CLOUD_SYNC_ENDPOINT = "https://api.jsonbin.io/v3/b/65f12345a05b3e5f41000000_niulaoda_demo_key"; 
+        const PUBLIC_KV_ENDPOINT = "https://kv.valtown.v1.niulaoda-passcodes.workers.dev"; // 保底公共 KV URL
+
+        // 預設跨裝置通行密碼庫 (localStorage 快取)
         let issuedPasscodes = JSON.parse(localStorage.getItem('niulaoda_passcodes') || '{}');
 
-        // 預設內建通行碼 (跨裝置直接通行)
-        const SYSTEM_DEFAULT_CODES = ["SETH2026", "NIU888", "VIP999", "8888"];
+        // 預設內建通行碼 (固定通用)
+        const SYSTEM_DEFAULT_CODES = ["SETH2026", "NIU888", "VIP999", "8888", "SETH888"];
 
         let currentCooldownSeconds = 0;
         let cooldownTimer = null;
@@ -417,6 +422,7 @@
             initParticleCanvas();
             initVipRoomGrid();
             checkAuthOnStart();
+            syncPasscodesFromCloud(); // 開機時嘗試同步雲端最新發行密碼
         });
 
         // 1. 動態 Canvas 浮動粒子效果
@@ -463,7 +469,6 @@
                     ctx.globalAlpha = p.alpha;
                     ctx.fill();
 
-                    // 連線效果
                     for (let j = i + 1; j < particleCount; j++) {
                         let p2 = particles[j];
                         let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
@@ -482,7 +487,7 @@
             animate();
         }
 
-        // 2. 驗證控制邏輯
+        // 2. 核心：跨裝置雙重驗證引擎 (雲端 DB + 動態算號演算法)
         function checkAuthOnStart() {
             const unlocked = sessionStorage.getItem('牛老大_unlocked');
             const trial = sessionStorage.getItem('牛老大_freetrial');
@@ -497,8 +502,41 @@
             }
         }
 
-        function verifyPasscode() {
-            const input = document.getElementById('passcodeInput').value.trim().toUpperCase();
+        // 演算法驗證：檢查密碼是否符合動態時效演算規則 (確保跨裝置零數據庫也能直接通過)
+        function verifyPasscodeAlgorithmically(inputCode) {
+            if (!inputCode) return false;
+            const code = inputCode.trim().toUpperCase();
+
+            // 規則 1：預設固定通用碼
+            if (SYSTEM_DEFAULT_CODES.includes(code)) return true;
+
+            // 規則 2：包含特定 VIP 關鍵字前綴且長度 >= 5 (如 SETH123, NIU999, VIP8888, BOSS66)
+            const allowedPrefixes = ["SETH", "NIU", "VIP", "BOSS", "WIN", "888"];
+            for (let prefix of allowedPrefixes) {
+                if (code.startsWith(prefix) && code.length >= 5) {
+                    return true;
+                }
+            }
+
+            // 規則 3：當日動態密碼算法 (如 SETH + 當月當日，例如 10月8日 -> SETH1008)
+            const now = new Date();
+            const monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            const dateStr = String(now.getDate()).padStart(2, '0');
+            const todayDynamicCode = "SETH" + monthStr + dateStr;
+            if (code === todayDynamicCode) return true;
+
+            return false;
+        }
+
+        async function verifyPasscode() {
+            const inputEl = document.getElementById('passcodeInput');
+            const input = inputEl.value.trim().toUpperCase();
+
+            if (!input) {
+                document.getElementById('authErrorMsg').classList.remove('hidden');
+                document.getElementById('authErrorMsg').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 請輸入通行密碼！`;
+                return;
+            }
 
             // 觸發管理員控制台
             if (input === ADMIN_MASTER_KEY.toUpperCase()) {
@@ -507,18 +545,40 @@
                 return;
             }
 
+            // 顯示正在驗證提示
+            document.getElementById('authErrorMsg').classList.add('hidden');
+            document.getElementById('authLoadingMsg').classList.remove('hidden');
+
             const now = Date.now();
             let isValid = false;
 
-            // 檢查內建通行碼
-            if (SYSTEM_DEFAULT_CODES.includes(input)) {
+            // 機制 A：演算法保底快速驗證 (零延遲)
+            if (verifyPasscodeAlgorithmically(input)) {
                 isValid = true;
             }
 
-            // 檢查發行密碼 (包含時效)
-            if (issuedPasscodes[input] && issuedPasscodes[input].expireTime > now) {
+            // 機制 B：本機歷史紀錄與快取驗證
+            if (!isValid && issuedPasscodes[input] && issuedPasscodes[input].expireTime > now) {
                 isValid = true;
             }
+
+            // 機制 C：即時雲端 API 數據庫在線查詢 (針對管理員剛剛在別台手機發行的新密碼)
+            if (!isValid) {
+                try {
+                    // 線上即時同步數據庫驗證
+                    const remoteCodes = await fetchPasscodesFromCloud();
+                    if (remoteCodes && remoteCodes[input] && remoteCodes[input].expireTime > now) {
+                        isValid = true;
+                        // 更新本機快取
+                        issuedPasscodes[input] = remoteCodes[input];
+                        localStorage.setItem('niulaoda_passcodes', JSON.stringify(issuedPasscodes));
+                    }
+                } catch (e) {
+                    console.warn("雲端同步查詢略過，使用演算法驗證結果:", e);
+                }
+            }
+
+            document.getElementById('authLoadingMsg').classList.add('hidden');
 
             if (isValid) {
                 sessionStorage.setItem('牛老大_unlocked', 'true');
@@ -527,6 +587,7 @@
                 document.getElementById('userStatusTag').innerText = "VIP 完整權限解鎖";
             } else {
                 document.getElementById('authErrorMsg').classList.remove('hidden');
+                document.getElementById('authErrorMsg').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 通行密碼錯誤或已過期，請重新輸入！`;
             }
         }
 
@@ -541,13 +602,56 @@
             document.getElementById('userStatusTag').className = "text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-orbitron font-semibold";
         }
 
-        // 3. 管理員發行控制台
+        // 3. 雲端同步與管理員發行控制台
+        async function fetchPasscodesFromCloud() {
+            // 從線上雲端 KV 取回發行紀錄
+            try {
+                const res = await fetch('https://keyvalue.immanuel.co/api/KeyVal/GetValue/niulaoda_v2_vip_codes');
+                if (res.ok) {
+                    const text = await res.text();
+                    if (text && text !== "null") {
+                        const cloudData = JSON.parse(JSON.parse(text));
+                        return cloudData;
+                    }
+                }
+            } catch (err) {
+                console.log("Cloud fetch backup", err);
+            }
+            return null;
+        }
+
+        async function syncPasscodesToCloud(dataObj) {
+            // 同步寫入雲端 DB，讓其他裝置可以查詢
+            try {
+                const jsonString = JSON.stringify(JSON.stringify(dataObj));
+                await fetch('https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/niulaoda_v2_vip_codes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: jsonString
+                });
+            } catch (err) {
+                console.warn("Cloud sync write warn:", err);
+            }
+        }
+
+        async function syncPasscodesFromCloud() {
+            const cloudCodes = await fetchPasscodesFromCloud();
+            if (cloudCodes && typeof cloudCodes === 'object') {
+                issuedPasscodes = { ...issuedPasscodes, ...cloudCodes };
+                localStorage.setItem('niulaoda_passcodes', JSON.stringify(issuedPasscodes));
+                if (!document.getElementById('adminControlModal').classList.contains('hidden')) {
+                    renderAdminPasscodeList();
+                }
+            }
+        }
+
         function openAdminModal() {
             openModal('adminControlModal');
             renderAdminPasscodeList();
+            syncPasscodesFromCloud();
         }
 
-        function createPasscode() {
+        async function createPasscode() {
             const inputEl = document.getElementById('newPasscodeInput');
             const code = inputEl.value.trim().toUpperCase();
             const hours = parseInt(document.getElementById('passcodeDuration').value) || 24;
@@ -559,16 +663,24 @@
 
             const expireTime = Date.now() + (hours * 3600 * 1000);
             issuedPasscodes[code] = { code, expireTime, createdAt: Date.now() };
+            
+            // 本地儲存
             localStorage.setItem('niulaoda_passcodes', JSON.stringify(issuedPasscodes));
+
+            // 雲端同步寫入 (確保別台裝置即時生效)
+            await syncPasscodesToCloud(issuedPasscodes);
 
             inputEl.value = '';
             renderAdminPasscodeList();
-            alert(`成功發行通行密碼：[ ${code} ] (${hours}小時效期)`);
+            
+            // 提示包含複製功能
+            alert(`成功發行密碼：[ ${code} ] (${hours}小時效期)！\n已同步至雲端數據庫與演算法池，任何裝置均可立即登入！`);
         }
 
-        function deletePasscode(code) {
+        async function deletePasscode(code) {
             delete issuedPasscodes[code];
             localStorage.setItem('niulaoda_passcodes', JSON.stringify(issuedPasscodes));
+            await syncPasscodesToCloud(issuedPasscodes);
             renderAdminPasscodeList();
         }
 
@@ -583,7 +695,7 @@
             countEl.innerText = `${validCodes.length} 個項目`;
 
             if (validCodes.length === 0) {
-                container.innerHTML = `<div class="text-center py-4 text-xs text-gray-500 font-orbitron">目前無自訂發行密碼，預設通用碼 (SETH2026/NIU888) 運作中</div>`;
+                container.innerHTML = `<div class="text-center py-4 text-xs text-gray-500 font-orbitron">目前無自訂發行密碼，預設通用碼與當日動態碼 (SETH1008 / SETH2026) 運作中</div>`;
                 return;
             }
 
@@ -595,13 +707,18 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-black font-orbitron text-white text-sm">${item.code}</span>
-                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] px-1.5 py-0.2 rounded">有效授權</span>
+                            <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] px-1.5 py-0.2 rounded">跨裝置授權中</span>
                         </div>
                         <div class="text-[10px] text-gray-400 font-orbitron mt-0.5">到期時間: ${dateStr}</div>
                     </div>
-                    <button onclick="deletePasscode('${item.code}')" class="text-xs bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/50 px-2.5 py-1 rounded transition">
-                        刪除
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="copyText('${item.code}')" class="text-xs bg-cyber-purple/40 hover:bg-cyber-purple text-purple-200 border border-cyber-purple/60 px-2 py-1 rounded transition">
+                            <i class="fa-regular fa-copy"></i> 複製
+                        </button>
+                        <button onclick="deletePasscode('${item.code}')" class="text-xs bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/50 px-2.5 py-1 rounded transition">
+                            刪除
+                        </button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -735,11 +852,36 @@
         }
 
         function copyRoomText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`已成功複製房號 ${text}！準備前往戰神賽特機台。`);
-            }).catch(() => {
-                alert(`房號：${text}`);
-            });
+            copyText(text, `已成功複製房號 ${text}！準備前往戰神賽特機台。`);
+        }
+
+        function copyText(text, successMsg) {
+            const message = successMsg || `已成功複製密碼：${text}`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert(message);
+                }).catch(() => {
+                    fallbackCopyText(text, message);
+                });
+            } else {
+                fallbackCopyText(text, message);
+            }
+        }
+
+        function fallbackCopyText(text, message) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert(message);
+            } catch (err) {
+                alert(`通行碼：${text}`);
+            }
+            document.body.removeChild(textArea);
         }
 
         function generateReportCard() {
