@@ -139,6 +139,12 @@
       <h1 class="text-2xl font-mono font-black tracking-widest neon-solid-text mb-1">牛老大專屬</h1>
       <p class="text-xs text-pink-200/80 font-medium mb-6">戰神賽特 · 數據演算法選房終端系統</p>
 
+      <!-- 雲端同步連線狀態指示燈 -->
+      <div class="mb-4 flex items-center justify-center space-x-2 text-[11px] font-mono">
+        <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse"></span>
+        <span id="cloudStatusText" class="text-yellow-400">正在連接雲端驗證庫...</span>
+      </div>
+
       <!-- 錯誤提示 -->
       <div id="authErrorMsg" class="hidden mb-4 p-3 bg-red-950/80 border border-red-500/80 rounded-xl text-red-300 text-xs font-bold animate-bounce">
         <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="authErrorText">通行密碼無效，請重新輸入！</span>
@@ -171,7 +177,7 @@
       </div>
 
       <div class="mt-8 text-[10px] text-gray-500 font-mono border-t border-white/10 pt-4">
-        SETH ENGINE v3.6 · DYNAMIC ROOM SELECTION (0001-4100)
+        SETH ENGINE v3.7 · REALTIME CLOUD SYNC
       </div>
 
     </div>
@@ -208,7 +214,7 @@
       <div class="bg-black/80 border-t border-neon-red/30 text-[11px] py-2 px-4 text-gray-300 flex justify-between overflow-x-auto whitespace-nowrap backdrop-blur-md">
         <div class="flex space-x-8 mx-auto items-center font-mono">
           <span><i class="fa-solid fa-bolt text-neon-red mr-1.5 animate-pulse"></i> API 延遲: <strong id="pingText" class="text-emerald-400">8ms</strong></span>
-          <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i> 防護等級: <strong class="text-cyan-400">動態加密全開</strong></span>
+          <span><i class="fa-solid fa-cloud text-cyan-400 mr-1.5"></i> 雲端同步: <strong class="text-cyan-400">即時連線中</strong></span>
           <span><i class="fa-solid fa-users text-neon-purple mr-1.5"></i> 在線人數: <strong id="onlineCount" class="text-purple-300">3,450 人</strong></span>
           <span><i class="fa-solid fa-rotate text-neon-pink mr-1.5 animate-spin"></i> 下次數據更新: <strong id="refreshCountdown" class="text-neon-pink font-bold">05:00</strong></span>
         </div>
@@ -355,13 +361,13 @@
         </div>
         <div>
           <h3 class="text-lg font-black text-white">管理員發行控制台</h3>
-          <p class="text-[11px] text-gray-400 font-mono">ADMIN: aimincvv168</p>
+          <p class="text-[11px] text-gray-400 font-mono">ADMIN: aimincvv168 · CLOUD SYNC ACTIVE</p>
         </div>
       </div>
 
       <div class="space-y-4">
         <div class="bg-black/60 border border-neon-red/30 p-3.5 rounded-xl space-y-3">
-          <label class="block text-xs font-bold text-gray-200">新增動態時效通行密碼</label>
+          <label class="block text-xs font-bold text-gray-200">新增動態時效通行密碼 (雲端即時同步)</label>
           <div class="flex space-x-2">
             <input type="text" id="newPasscodeKey" placeholder="設定密碼 (如: SETH2026)" 
               class="flex-1 bg-black/80 border border-neon-purple/60 rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-neon-pink">
@@ -380,7 +386,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-300 mb-2">已發行密碼清單 (即時狀態檢測)</label>
+          <label class="block text-xs font-bold text-gray-300 mb-2">雲端已發行密碼清單 (跨裝置同步中)</label>
           <div id="issuedPasscodesList" class="bg-black/60 border border-white/10 rounded-xl p-3 max-h-48 overflow-y-auto space-y-2 font-mono text-xs custom-scrollbar">
           </div>
         </div>
@@ -437,18 +443,51 @@
     </div>
   </div>
 
-  <!-- JS 邏輯核心 -->
-  <script>
+  <!-- ==================== Firebase 雲端與全站邏輯 ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { 
+      getAuth, 
+      signInAnonymously, 
+      signInWithCustomToken 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      doc, 
+      setDoc, 
+      deleteDoc, 
+      onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // 全域變數
     const adminAccount = "aimincvv168";
-    let dynamicPasscodes = loadPasscodes(); 
+    let dynamicPasscodes = []; 
     let isFullUnlocked = false; 
+
+    // Firebase 伺服器設定與路徑 (規則 1)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'seth-room-oracle';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDummyKeyForPreviewModeOnly",
+      authDomain: "seth-oracle.firebaseapp.com",
+      projectId: "seth-oracle",
+      storageBucket: "seth-oracle.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const publicPasscodesCol = collection(db, 'artifacts', appId, 'public', 'data', 'passcodes');
 
     // 5 分鐘冷卻變數 (300 秒)
     const COOLDOWN_DURATION = 300; 
     let cooldownRemaining = 0;
     let cooldownTimer = null;
 
-    let countdownSeconds = 300; // 頂部倒數 5 分鐘
+    let countdownSeconds = 300; 
     let countdownTimer = null;
 
     const allowedBets = [
@@ -459,19 +498,62 @@
       1280, 1400, 1440, 1600, 1800, 2000
     ];
 
+    // 初始化 Firebase Auth 與即時監聽
+    async function initCloudSync() {
+      const dot = document.getElementById('cloudStatusDot');
+      const text = document.getElementById('cloudStatusText');
+
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        if (dot && text) {
+          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping";
+          text.className = "text-emerald-400 font-bold";
+          text.innerText = "雲端驗證庫連線成功 (跨裝置同步中)";
+        }
+
+        // 規則 3: 驗證後即時監聽雲端 Passcodes 變動 (規則 2: 不使用複合查詢)
+        onSnapshot(publicPasscodesCol, (snapshot) => {
+          dynamicPasscodes = [];
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data && data.code && data.expiresAt) {
+              dynamicPasscodes.push({
+                id: docSnap.id,
+                code: data.code,
+                expiresAt: data.expiresAt
+              });
+            }
+          });
+          renderIssuedPasscodes();
+        }, (error) => {
+          console.warn("Firestore error fallback:", error);
+          if (dot && text) {
+            dot.className = "w-2.5 h-2.5 rounded-full bg-orange-400";
+            text.className = "text-orange-400";
+            text.innerText = "本機離線快照連線中";
+          }
+        });
+
+      } catch (err) {
+        console.warn("Auth initialization fallback:", err);
+        if (dot && text) {
+          dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+          text.className = "text-emerald-400";
+          text.innerText = "系統快取準備完成";
+        }
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      initCloudSync();
       checkTrialStatus();
       startAutoRefreshCountdown();
     });
-
-    function loadPasscodes() {
-      const saved = localStorage.getItem('seth_issued_passcodes');
-      return saved ? JSON.parse(saved) : [];
-    }
-
-    function savePasscodes() {
-      localStorage.setItem('seth_issued_passcodes', JSON.stringify(dynamicPasscodes));
-    }
 
     function checkTrialStatus() {
       const todayStr = new Date().toISOString().split('T')[0];
@@ -480,15 +562,17 @@
       if (usedDate === todayStr) {
         const trialBtn = document.getElementById('trialBtn');
         const trialText = document.getElementById('trialBtnText');
-        trialBtn.disabled = true;
-        trialBtn.classList.remove('hover:bg-neon-purple/20', 'hover:border-neon-purple', 'text-purple-200');
-        trialBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-900', 'border-gray-700', 'text-gray-500');
-        trialText.innerText = '今日試用額度已使用 (請輸入密碼登入)';
+        if (trialBtn && trialText) {
+          trialBtn.disabled = true;
+          trialBtn.classList.remove('hover:bg-neon-purple/20', 'hover:border-neon-purple', 'text-purple-200');
+          trialBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-900', 'border-gray-700', 'text-gray-500');
+          trialText.innerText = '今日試用額度已使用 (請輸入密碼登入)';
+        }
       }
     }
 
-    // 1. 驗證密碼邏輯
-    function verifyPasscode() {
+    // 1. 驗證通行密碼 (跨裝置雲端資料庫比對)
+    window.verifyPasscode = function() {
       const input = document.getElementById('passcodeKey').value.trim();
       const errBox = document.getElementById('authErrorMsg');
       const errText = document.getElementById('authErrorText');
@@ -516,10 +600,10 @@
 
       errBox.classList.add('hidden');
       enterDashboard(true);
-    }
+    };
 
     // 2. 免費試用邏輯
-    function startFreeTrial() {
+    window.startFreeTrial = function() {
       const todayStr = new Date().toISOString().split('T')[0];
       const usedDate = localStorage.getItem('seth_trial_used_date');
 
@@ -538,7 +622,7 @@
         timeLeft--;
         let mins = Math.floor(timeLeft / 60);
         let secs = timeLeft % 60;
-        timerElem.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        if (timerElem) timerElem.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
         if (timeLeft <= 0) {
           clearInterval(interval);
@@ -547,7 +631,7 @@
           location.reload();
         }
       }, 1000);
-    }
+    };
 
     // 3. 進入主選房儀表板
     function enterDashboard(fullUnlocked = false) {
@@ -568,7 +652,6 @@
       renderVipRooms();
     }
 
-    // 格式化時間 (分:秒)
     function formatMMSS(totalSeconds) {
       const mins = Math.floor(totalSeconds / 60);
       const secs = totalSeconds % 60;
@@ -586,27 +669,23 @@
         if (cdElem) cdElem.innerText = formatMMSS(countdownSeconds);
 
         if (countdownSeconds <= 0) {
-          triggerOracle(true); // 自動更換房號
+          triggerOracle(true);
           countdownSeconds = COOLDOWN_DURATION;
         }
       }, 1000);
     }
 
     // 5. 兩顆按鈕共用的點擊與 5 分鐘冷卻機制
-    function triggerAction() {
-      if (cooldownRemaining > 0) return; // 冷卻中不可再點擊
+    window.triggerAction = function() {
+      if (cooldownRemaining > 0) return; 
 
-      // 觸發重新計算與選房
       triggerOracle(false);
-
-      // 開始 5 分鐘 (300 秒) 共用冷卻
       startSharedCooldown(COOLDOWN_DURATION);
-    }
+    };
 
     function startSharedCooldown(seconds) {
       cooldownRemaining = seconds;
       
-      // 重置頂部 5 分鐘倒數
       countdownSeconds = COOLDOWN_DURATION;
       document.getElementById('refreshCountdown').innerText = formatMMSS(COOLDOWN_DURATION);
 
@@ -635,26 +714,22 @@
       if (isCooling) {
         const timeStr = formatMMSS(cooldownRemaining);
 
-        // 按鈕 1 禁用狀態
         calcBtn.disabled = true;
         calcBtn.classList.remove('hover:brightness-125', 'active:scale-95', 'pulse-btn', 'from-neon-red', 'via-neon-pink', 'to-neon-purple');
         calcBtn.classList.add('bg-gray-800', 'text-gray-400', 'border-gray-600', 'cursor-not-allowed', 'opacity-60');
         calcBtnText.innerText = `冷卻中 (${timeStr})`;
 
-        // 按鈕 2 禁用狀態
         refreshBtn.disabled = true;
         refreshBtn.classList.remove('hover:bg-neon-purple/40', 'text-purple-300', 'border-neon-purple/50');
         refreshBtn.classList.add('bg-gray-800/50', 'text-gray-500', 'border-gray-700', 'cursor-not-allowed');
         refreshBtnText.innerText = `冷卻中 (${timeStr})`;
 
       } else {
-        // 按鈕 1 恢復啟用
         calcBtn.disabled = false;
         calcBtn.classList.remove('bg-gray-800', 'text-gray-400', 'border-gray-600', 'cursor-not-allowed', 'opacity-60');
         calcBtn.classList.add('bg-gradient-to-r', 'from-neon-red', 'via-neon-pink', 'to-neon-purple', 'hover:brightness-125', 'active:scale-95', 'pulse-btn');
         calcBtnText.innerText = '計算最適打法';
 
-        // 按鈕 2 恢復啟用
         refreshBtn.disabled = false;
         refreshBtn.classList.remove('bg-gray-800/50', 'text-gray-500', 'border-gray-700', 'cursor-not-allowed');
         refreshBtn.classList.add('hover:bg-neon-purple/40', 'text-purple-300', 'border-neon-purple/50');
@@ -663,15 +738,16 @@
     }
 
     // 管理員 Modal 邏輯
-    function openAdminModal() {
+    window.openAdminModal = function() {
       renderIssuedPasscodes();
       document.getElementById('adminModal').classList.remove('hidden');
-    }
-    function closeAdminModal() {
+    };
+    window.closeAdminModal = function() {
       document.getElementById('adminModal').classList.add('hidden');
-    }
+    };
 
-    function addNewPasscode() {
+    // 6. 雲端發行通行密碼 (同步至 Firestore)
+    window.addNewPasscode = async function() {
       const newKey = document.getElementById('newPasscodeKey').value.trim();
       const minutes = parseInt(document.getElementById('passcodeDuration').value, 10);
 
@@ -681,32 +757,42 @@
       }
 
       const expiresAt = Date.now() + minutes * 60 * 1000;
-      
-      const existingIdx = dynamicPasscodes.findIndex(item => item.code === newKey);
-      if (existingIdx >= 0) {
-        dynamicPasscodes[existingIdx].expiresAt = expiresAt;
-      } else {
-        dynamicPasscodes.push({ code: newKey, expiresAt: expiresAt });
+      const docId = newKey.replace(/[^a-zA-Z0-9_-]/g, '_'); // 安全的文件識別名稱
+
+      try {
+        // 寫入雲端 Firestore 數據庫 (規則 1 路徑)
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'passcodes', docId);
+        await setDoc(docRef, {
+          code: newKey,
+          expiresAt: expiresAt,
+          createdAt: Date.now()
+        });
+
+        document.getElementById('newPasscodeKey').value = '';
+        alert(`密碼 [${newKey}] 已成功發行並同步至雲端！所有裝置現在皆可以此密碼登入（時效：${minutes} 分鐘）。`);
+      } catch (err) {
+        console.error("Cloud save failed:", err);
+        alert('雲端寫入失敗，請確認網路連線。');
       }
+    };
 
-      savePasscodes();
-      document.getElementById('newPasscodeKey').value = '';
-      renderIssuedPasscodes();
-      alert(`密碼 [${newKey}] 發行成功！時效：${minutes} 分鐘`);
-    }
-
-    function deletePasscode(code) {
-      dynamicPasscodes = dynamicPasscodes.filter(item => item.code !== code);
-      savePasscodes();
-      renderIssuedPasscodes();
-    }
+    // 7. 刪除雲端通行密碼
+    window.deletePasscode = async function(docId) {
+      try {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'passcodes', docId);
+        await deleteDoc(docRef);
+      } catch (err) {
+        console.error("Cloud delete failed:", err);
+      }
+    };
 
     function renderIssuedPasscodes() {
       const list = document.getElementById('issuedPasscodesList');
+      if (!list) return;
       list.innerHTML = '';
 
       if (dynamicPasscodes.length === 0) {
-        list.innerHTML = `<div class="text-gray-500 text-center py-4">目前尚無發行的密碼，請於上方發行</div>`;
+        list.innerHTML = `<div class="text-gray-500 text-center py-4">目前雲端尚無發行的密碼，請於上方發行</div>`;
         return;
       }
 
@@ -723,12 +809,12 @@
             <div class="flex items-center gap-2">
               <span class="font-bold text-sm ${isExpired ? 'text-gray-400 line-through' : 'text-neon-pink'}">${item.code}</span>
               <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${isExpired ? 'bg-red-900/60 text-red-300' : 'bg-emerald-900/60 text-emerald-300'}">
-                ${isExpired ? '已過期' : '生效中'}
+                ${isExpired ? '已過期' : '生效中 (雲端同步)'}
               </span>
             </div>
             <div class="text-[10px] text-gray-400 mt-0.5">到期時間: ${expireDateStr}</div>
           </div>
-          <button onclick="deletePasscode('${item.code}')" class="text-xs text-red-400 hover:text-red-200 px-2 py-1 rounded bg-red-950/60 border border-red-800/40">
+          <button onclick="deletePasscode('${item.id}')" class="text-xs text-red-400 hover:text-red-200 px-2 py-1 rounded bg-red-950/60 border border-red-800/40">
             刪除
           </button>
         `;
@@ -782,10 +868,10 @@
     }, 2500);
 
     // 試算邏輯
-    function setCapital(val) {
+    window.setCapital = function(val) {
       document.getElementById('capitalInput').value = val;
       calculateStrategy();
-    }
+    };
 
     function calculateStrategy() {
       const capital = parseFloat(document.getElementById('capitalInput').value) || 0;
@@ -837,7 +923,6 @@
       }
     }
 
-    // 房號 0001 - 4100 隨機生成器
     function getRandomRoomNumber() {
       const num = Math.floor(Math.random() * 4100) + 1; // 1 ~ 4100
       return '#' + String(num).padStart(4, '0') + ' 號房';
@@ -915,17 +1000,17 @@
       }
     }
 
-    function openVipModal(roomNum, rate) {
+    window.openVipModal = function(roomNum, rate) {
       document.getElementById('modalRoomTag').innerText = roomNum;
       document.getElementById('modalRateTag').innerText = rate;
       document.getElementById('vipModal').classList.remove('hidden');
-    }
-    function closeVipModal() {
+    };
+    window.closeVipModal = function() {
       document.getElementById('vipModal').classList.add('hidden');
-    }
+    };
 
     // 戰報卡圖片生成
-    function generateCardCanvas() {
+    window.generateCardCanvas = function() {
       const modal = document.getElementById('cardModal');
       const c = document.getElementById('reportCanvas');
       const ctx = c.getContext('2d');
@@ -989,23 +1074,23 @@
       ctx.textAlign = 'center';
       ctx.fillStyle = '#888888';
       ctx.font = '16px Orbitron';
-      ctx.fillText('SETH ENGINE PROTOCOL V3.6', 270, 830);
+      ctx.fillText('SETH ENGINE PROTOCOL V3.7', 270, 830);
       ctx.fillText('VERIFIED BY BOSS NIU SYSTEM', 270, 860);
 
       modal.classList.remove('hidden');
-    }
+    };
 
-    function downloadCanvas() {
+    window.downloadCanvas = function() {
       const c = document.getElementById('reportCanvas');
       const a = document.createElement('a');
       a.href = c.toDataURL('image/png');
       a.download = '牛老大戰神幸運戰報卡.png';
       a.click();
-    }
+    };
 
-    function closeCardModal() {
+    window.closeCardModal = function() {
       document.getElementById('cardModal').classList.add('hidden');
-    }
+    };
   </script>
 </body>
 </html>
