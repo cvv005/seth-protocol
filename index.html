@@ -175,12 +175,12 @@
 
             <button id="calcBtn" onclick="triggerCooldownAction('calc')" class="w-full mt-6 py-3.5 bg-gradient-to-r from-cyber-pink to-cyber-purple text-white font-black text-base rounded-xl shadow-lg shadow-cyber-pink/30 transition transform active:scale-95 flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-calculator"></i>
-                <span id="calcBtnText">計算最適打法</span>
+                <span id="calcBtnText">計算最適打法與推薦房號</span>
             </button>
         </section>
 
         <!-- 右側：房號面板 -->
-        <section class="lg:col-span-7 bg-cyber-card/90 rounded-2xl p-5 border border-cyber-border shadow-2xl space-y-5 backdrop-blur-md">
+        <section id="roomSection" class="lg:col-span-7 bg-cyber-card/90 rounded-2xl p-5 border border-cyber-border shadow-2xl space-y-5 backdrop-blur-md">
             <div class="flex items-center justify-between border-b border-cyber-border/60 pb-3">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-fire text-cyber-pink text-lg"></i>
@@ -202,10 +202,10 @@
                 <div class="flex items-baseline justify-between mt-1">
                     <div>
                         <div class="text-3xl font-black font-orbitron text-white tracking-widest">
-                            <span id="kingRoomNo" class="text-cyber-pink">#1418</span> <span class="text-lg font-normal text-gray-300">號房</span>
+                            <span id="kingRoomNo" class="text-cyber-pink">#----</span> <span class="text-lg font-normal text-gray-300">號房</span>
                         </div>
                     </div>
-                    <div id="kingRoomWinRate" class="text-3xl font-black font-orbitron text-cyber-green">98.4%</div>
+                    <div id="kingRoomWinRate" class="text-3xl font-black font-orbitron text-cyber-green">--.-%</div>
                 </div>
             </div>
 
@@ -252,7 +252,7 @@
         </div>
     </div>
 
-    <!-- 管理員控制台 Modal (新增已發行代碼 & 剩餘時間倒數) -->
+    <!-- 管理員控制台 Modal -->
     <div id="adminModal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-cyber-card border-2 border-cyber-pink/80 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-cyber-border/60 pb-3">
@@ -306,17 +306,46 @@
         const COOLDOWN_TIME = 300;
         let currentCooldownSeconds = 0;
         let cooldownTimer = null;
-        let generatedCodesList = []; // 儲存發行過的代碼陣列
+        let generatedCodesList = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             initCyberHexParticles();
-            initVipRoomGrid();
+            refreshAllRoomsData(); // 每次開啟/登入時，完全隨機生成全新房號數據
             checkAuthOnStart();
             loadPasscodeHistory();
-            setInterval(updatePasscodesRemainingTime, 1000); // 每一秒更新所有密碼剩餘時間倒數
+            setInterval(updatePasscodesRemainingTime, 1000);
         });
 
-        // 升級版背景：賽博幾何光帶與脈衝光點 (絕無 12 星座)
+        // 隨機產生 0001~4100 房號
+        function getRandomRoomNo() {
+            return '#' + String(Math.floor(Math.random() * 4100) + 1).padStart(4, '0');
+        }
+
+        // 每次登入或刷新時呼叫：隨機重新生成帝王房與 VIP 房號數據
+        function refreshAllRoomsData() {
+            // 隨機帝王房號與勝率 (97.0% ~ 99.2%)
+            document.getElementById('kingRoomNo').innerText = getRandomRoomNo();
+            document.getElementById('kingRoomWinRate').innerText = (97.0 + Math.random() * 2.2).toFixed(1) + '%';
+
+            // 隨機生成 VIP 房卡池
+            const grid = document.getElementById('vipRoomGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const card = document.createElement('div');
+                card.className = "bg-black/50 border border-cyber-border/80 rounded-xl p-3 flex items-center justify-between transition hover:border-cyber-pink/60";
+                card.innerHTML = `
+                    <div>
+                        <div class="text-xs text-cyber-purple font-bold">VIP ${i} 爆分房</div>
+                        <div class="text-lg font-black font-orbitron text-white">${getRandomRoomNo()}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-black font-orbitron text-cyber-green">${(94.5 + Math.random() * 4.3).toFixed(1)}%</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+        }
+
         function initCyberHexParticles() {
             const canvas = document.getElementById('bgCanvas');
             const ctx = canvas.getContext('2d');
@@ -328,7 +357,6 @@
                 height = canvas.height = window.innerHeight;
             });
 
-            // 金屬質感的科技粒子與線條
             const particles = Array.from({ length: 45 }, () => ({
                 x: Math.random() * width,
                 y: Math.random() * height,
@@ -342,7 +370,6 @@
             function animate() {
                 ctx.clearRect(0, 0, width, height);
 
-                // 畫出連線幾何矩陣
                 for (let i = 0; i < particles.length; i++) {
                     for (let j = i + 1; j < particles.length; j++) {
                         const dx = particles[i].x - particles[j].x;
@@ -360,7 +387,6 @@
                     }
                 }
 
-                // 畫出脈衝粒子點
                 particles.forEach(p => {
                     p.x += p.vx;
                     p.y += p.vy;
@@ -438,7 +464,6 @@
             }
         }
 
-        // 隨機生成通行碼，並寫入紀錄
         function generateRandomPasscode() {
             const hours = parseInt(document.getElementById('validHoursSelect').value, 10);
             const nowSec = Math.floor(Date.now() / 1000);
@@ -460,7 +485,7 @@
                 hours: hours
             };
 
-            generatedCodesList.unshift(item); // 最新發行的排在前面
+            generatedCodesList.unshift(item);
             savePasscodeHistory();
             renderPasscodeHistoryUI();
 
@@ -493,7 +518,6 @@
             renderPasscodeHistoryUI();
         }
 
-        // 渲染已發行代碼與時效卡片
         function renderPasscodeHistoryUI() {
             const container = document.getElementById('passcodeHistoryContainer');
             if (!container) return;
@@ -501,7 +525,7 @@
             if (generatedCodesList.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-4 text-xs text-gray-500 bg-black/30 rounded-xl border border-cyber-border/40">
-                        目前尚無已發行的通行碼，點擊上方按鈕立即生成
+                        目前尚無已發行的通行碼，點擊上方按鈕開啟發行
                     </div>
                 `;
                 return;
@@ -541,7 +565,6 @@
             container.innerHTML = html;
         }
 
-        // 即時倒數算式
         function updatePasscodesRemainingTime() {
             if (generatedCodesList.length === 0) return;
             const now = Math.floor(Date.now() / 1000);
@@ -551,7 +574,7 @@
                 if (el) {
                     const remainSec = item.expireSec - now;
                     if (remainSec <= 0) {
-                        renderPasscodeHistoryUI(); // 重新整理狀態
+                        renderPasscodeHistoryUI();
                     } else {
                         el.innerText = formatRemainingTime(remainSec);
                     }
@@ -607,36 +630,21 @@
             document.getElementById('defenseRounds').innerText = `${rounds} 轉`;
         }
 
-        function getRandomRoomNo() {
-            return '#' + String(Math.floor(Math.random() * 4100) + 1).padStart(4, '0');
-        }
-
-        function initVipRoomGrid() {
-            const grid = document.getElementById('vipRoomGrid');
-            grid.innerHTML = '';
-            for (let i = 1; i <= 10; i++) {
-                const card = document.createElement('div');
-                card.className = "bg-black/50 border border-cyber-border/80 rounded-xl p-3 flex items-center justify-between";
-                card.innerHTML = `
-                    <div>
-                        <div class="text-xs text-cyber-purple font-bold">VIP ${i} 爆分房</div>
-                        <div class="text-lg font-black font-orbitron text-white">${getRandomRoomNo()}</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-lg font-black font-orbitron text-cyber-green">${(95.0 + Math.random() * 4.8).toFixed(1)}%</div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            }
-        }
-
+        // 觸發計算與刷新機制
         function triggerCooldownAction(source) {
             if (currentCooldownSeconds > 0) return;
-            if (source === 'calc') calculateStrategy();
-            if (source === 'refresh') {
-                document.getElementById('kingRoomNo').innerText = getRandomRoomNo();
-                initVipRoomGrid();
+
+            if (source === 'calc') {
+                calculateStrategy();
+                refreshAllRoomsData(); // 點擊計算最適打法時同步隨機刷新推薦房號
+                // 滾動畫面至房號區塊
+                document.getElementById('roomSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
+
+            if (source === 'refresh') {
+                refreshAllRoomsData(); // 手動刷新
+            }
+
             startCooldown(COOLDOWN_TIME);
         }
 
@@ -647,7 +655,7 @@
                 currentCooldownSeconds--;
                 if (currentCooldownSeconds <= 0) {
                     clearInterval(cooldownTimer);
-                    document.getElementById('calcBtnText').innerText = "計算最適打法";
+                    document.getElementById('calcBtnText').innerText = "計算最適打法與推薦房號";
                     document.getElementById('refreshBtnText').innerText = "手動刷新";
                 } else {
                     updateCooldownUI();
